@@ -1,0 +1,18 @@
+{
+  "key": "MetadataV1",
+  "update_authority": "DMVNRo3iJUWeasNTHyhSq6jDPG8T3CYfrUrDkhmiDZ5Q",
+  "mint": "AQcchjgVmPiAhFwzAWbUa76eXZTt6ofuKs48hSoLPHkj",
+  "name": "AREA523",
+  "symbol": "AREA",
+  "uri": "https://ipfs.io/ipfs/bafkreie4ehywc3ysq26r2qsfmvt3ndruliayigayzhp2aq2umiovmnntpe",
+  "seller_fee_basis_points": 0,
+  "creators": null,
+  "primary_sale_happened": false,
+  "is_mutable": true,
+  "edition_nonce": 255,
+  "token_standard": "Fungible",
+  "collection": null,
+  "uses": null,
+  "collection_details": null,
+  "programmable_config": null
+}

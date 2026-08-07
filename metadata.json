@@ -1,0 +1,16 @@
+{
+  "name": "AREA523",
+  "symbol": "AREA",
+  "description": "AREA523 is a decentralized community verification network where users collectively verify authentic and AI-generated content through transparent voting.",
+  "image": "https://gateway.pinata.cloud/ipfs/bafkreieqo3ze6fl4ix74rytbwnmbwamynvtk3n5xocpfpytzu234eboqpe",
+  "external_url": "https://x.com/AREA_523",
+  "seller_fee_basis_points": 0,
+  "properties": {
+    "files": [
+      {
+        "uri": "https://gateway.pinata.cloud/ipfs/bafkreieqo3ze6fl4ix74rytbwnmbwamynvtk3n5xocpfpytzu234eboqpe",
+        "type": "image/png"
+      }
+    ]
+  }
+}
