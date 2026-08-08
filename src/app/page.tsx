@@ -241,28 +241,6 @@ export default async function Home() {
                   AI-generated material.
                 </p>
 
-                <div className="mt-5 grid grid-cols-2 border-y border-white/10 py-4">
-                  <div>
-                    <p className="text-lg font-bold text-white">
-                      52.3K
-                    </p>
-
-                    <p className="text-xs text-white/35">
-                      Members
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-lg font-bold text-white">
-                      523
-                    </p>
-
-                    <p className="text-xs text-white/35">
-                      Online
-                    </p>
-                  </div>
-                </div>
-
                 <Link
                   href="/create"
                   className="mt-5 block w-full rounded-full bg-[#48a7ff] py-2.5 text-center text-sm font-bold text-[#06111c] transition hover:bg-[#71baff]"
