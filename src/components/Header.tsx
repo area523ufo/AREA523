@@ -85,11 +85,40 @@ export default function Header() {
       );
     };
   }, []);
-
+  
   const openAuthModal = (mode: AuthMode) => {
     setAuthMode(mode);
     setIsAuthModalOpen(true);
   };
+
+useEffect(() => {
+  function handleOpenAuth(event: Event) {
+    const customEvent =
+      event as CustomEvent<{
+        mode?: AuthMode;
+      }>;
+
+    const mode =
+      customEvent.detail?.mode === "login"
+        ? "login"
+        : "signup";
+
+    setAuthMode(mode);
+    setIsAuthModalOpen(true);
+  }
+
+  window.addEventListener(
+    "area523:open-auth",
+    handleOpenAuth,
+  );
+
+  return () => {
+    window.removeEventListener(
+      "area523:open-auth",
+      handleOpenAuth,
+    );
+  };
+}, []);
 
   const handleLogout = async () => {
   await signOut();

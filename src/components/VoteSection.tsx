@@ -111,10 +111,20 @@ export default function VoteSection({
   async function handleVote(nextVote: VoteType) {
     setMessage(null);
 
-    if (!userId) {
-      setMessage("Sign in to cast your vote.");
-      return;
-    }
+   if (!userId) {
+  window.dispatchEvent(
+    new CustomEvent(
+      "area523:open-auth",
+      {
+        detail: {
+          mode: "signup",
+        },
+      },
+    ),
+  );
+
+  return;
+}
 
     if (isSubmitting) {
       return;

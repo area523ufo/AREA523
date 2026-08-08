@@ -223,15 +223,30 @@ export default function PostCard({
         | VoteSuccessResponse
         | VoteErrorResponse;
 
-      if (!response.ok || !result.success) {
-        const errorMessage =
-          "error" in result
-            ? result.error
-            : "The vote could not be processed.";
+     if (response.status === 401) {
+  window.dispatchEvent(
+    new CustomEvent(
+      "area523:open-auth",
+      {
+        detail: {
+          mode: "signup",
+        },
+      },
+    ),
+  );
 
-        setVoteError(errorMessage);
-        return;
-      }
+  return;
+}
+
+if (!response.ok || !result.success) {
+  const errorMessage =
+    "error" in result
+      ? result.error
+      : "The vote could not be processed.";
+
+  setVoteError(errorMessage);
+  return;
+}
 
       setRealVotes(result.realVotes);
       setAiVotes(result.aiVotes);
@@ -298,10 +313,25 @@ export default function PostCard({
 
       const result = await response.json();
 
-      if (!response.ok || !result.success) {
-        console.error(result.error);
-        return;
-      }
+     if (response.status === 401) {
+  window.dispatchEvent(
+    new CustomEvent(
+      "area523:open-auth",
+      {
+        detail: {
+          mode: "signup",
+        },
+      },
+    ),
+  );
+
+  return;
+}
+
+if (!response.ok || !result.success) {
+  console.error(result.error);
+  return;
+}
 
       setReposted(result.reposted);
       setRepostCount(result.repostCount);

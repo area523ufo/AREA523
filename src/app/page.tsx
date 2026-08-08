@@ -251,12 +251,6 @@ export default async function Home() {
                   Create Post
                 </Link>
 
-                <button
-                  type="button"
-                  className="mt-2 w-full rounded-full border border-[#48a7ff]/50 py-2.5 text-sm font-bold text-[#69b7ff] transition hover:bg-[#48a7ff]/10"
-                >
-                  Join AREA523
-                </button>
               </div>
             </section>
 
