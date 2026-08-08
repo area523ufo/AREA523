@@ -834,33 +834,50 @@ async function main(): Promise<void> {
             );
         }
 
-        const rewardAmount =
-            toBigIntAmount(
-                claimedReward.amount,
-                "amount"
-            );
+const rewardAmount =
+    toBigIntAmount(
+        claimedReward.amount,
+        "amount"
+    );
 
-        const burnAmount =
-            toBigIntAmount(
-                claimedReward.burn_amount,
-                "burn_amount"
-            );
+const burnAmount =
+    toBigIntAmount(
+        claimedReward.burn_amount,
+        "burn_amount"
+    );
 
-        if (rewardAmount <= 0n) {
-            throw new Error(
-                "Reward amount must be greater than zero."
-            );
-        }
+if (rewardAmount <= 0n) {
+    throw new Error(
+        "Reward amount must be greater than zero."
+    );
+}
 
-        if (burnAmount < 0n) {
-            throw new Error(
-                "Burn amount cannot be negative."
-            );
-        }
+if (burnAmount < 0n) {
+    throw new Error(
+        "Burn amount cannot be negative."
+    );
+}
 
-        const totalRequired =
-            rewardAmount +
-            burnAmount;
+/*
+ * Database amounts are stored in whole AREA units.
+ * Solana SPL instructions require raw token units.
+ *
+ * Example with 9 decimals:
+ * 5 AREA   -> 5,000,000,000 raw units
+ * 100 AREA -> 100,000,000,000 raw units
+ */
+const tokenBase =
+    10n ** BigInt(mint.decimals);
+
+const rewardRawAmount =
+    rewardAmount * tokenBase;
+
+const burnRawAmount =
+    burnAmount * tokenBase;
+
+const totalRequired =
+    rewardRawAmount +
+    burnRawAmount;
 
         const sourceBalance =
             await connection
@@ -886,23 +903,17 @@ async function main(): Promise<void> {
             );
         }
 
-        console.log(
-            "Reward:",
-            formatTokenAmount(
-                rewardAmount,
-                mint.decimals
-            ),
-            "AREA"
-        );
+       console.log(
+    "Reward:",
+    rewardAmount.toString(),
+    "AREA"
+);
 
-        console.log(
-            "Burn:",
-            formatTokenAmount(
-                burnAmount,
-                mint.decimals
-            ),
-            "AREA"
-        );
+console.log(
+    "Burn:",
+    burnAmount.toString(),
+    "AREA"
+);
 
         // ----------------------------------------------
         // Recipient ATA
@@ -950,22 +961,22 @@ async function main(): Promise<void> {
                 mintPublicKey,
                 recipientTokenAccount.address,
                 wallet.publicKey,
-                rewardAmount,
+                rewardRawAmount,
                 mint.decimals
             )
         );
 
-        if (burnAmount > 0n) {
-            transaction.add(
-                createBurnCheckedInstruction(
-                    rewardsAta,
-                    mintPublicKey,
-                    wallet.publicKey,
-                    burnAmount,
-                    mint.decimals
-                )
-            );
-        }
+       if (burnAmount > 0n) {
+    transaction.add(
+        createBurnCheckedInstruction(
+            rewardsAta,
+            mintPublicKey,
+            wallet.publicKey,
+            burnRawAmount,
+            mint.decimals
+        )
+    );
+}
 
         transaction.sign(
             wallet
@@ -1062,22 +1073,17 @@ async function main(): Promise<void> {
             "Signature:",
             actualSignature
         );
-        console.log(
-            "Transferred:",
-            formatTokenAmount(
-                rewardAmount,
-                mint.decimals
-            ),
-            "AREA"
-        );
-        console.log(
-            "Burned:",
-            formatTokenAmount(
-                burnAmount,
-                mint.decimals
-            ),
-            "AREA"
-        );
+       console.log(
+    "Transferred:",
+    rewardAmount.toString(),
+    "AREA"
+);
+
+console.log(
+    "Burned:",
+    burnAmount.toString(),
+    "AREA"
+);
 
         console.log("");
         console.log(
