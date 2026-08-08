@@ -223,6 +223,8 @@ export default async function Home() {
           <aside className="hidden space-y-4 xl:block">
             <MonthlyRankingWidget />
             
+            <AreaLaunchCard />
+
             <section className="overflow-hidden rounded-xl border border-white/10 bg-[#12151a]">
               <div className="border-b border-white/10 bg-gradient-to-r from-[#17304a] to-[#101923] px-5 py-5">
                 <p className="text-xs font-bold tracking-[0.25em] text-[#75bdff]">
@@ -264,70 +266,25 @@ export default async function Home() {
               </h3>
 
               <div className="mt-4 space-y-1">
-                {[
-                  ["UFO Sighting", "12.4K"],
-                  ["Government", "8.1K"],
-                  ["Alien", "6.7K"],
-                  ["Video", "5.9K"],
-                  ["Discussion", "4.2K"],
-                ].map(([tag, count]) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm text-white/55 transition hover:bg-white/[0.05] hover:text-white"
-                  >
-                    <span>#{tag}</span>
-
-                    <span className="text-xs text-white/30">
-                      {count}
-                    </span>
-                  </button>
-                ))}
-              </div>
+  {[
+    "UFO Sighting",
+    "Government",
+    "Alien",
+    "Video",
+    "Discussion",
+  ].map((tag) => (
+    <button
+      key={tag}
+      type="button"
+      className="flex w-full items-center rounded-lg px-3 py-2.5 text-sm text-white/55 transition hover:bg-white/[0.05] hover:text-white"
+    >
+      <span>#{tag}</span>
+    </button>
+  ))}
+</div>
             </section>
 
-          <footer className="px-3 text-xs leading-5 text-white/25">
-  <div className="flex flex-wrap gap-x-3 gap-y-1">
-    <Link
-      href="/about"
-      className="transition hover:text-white/60"
-    >
-      About
-    </Link>
 
-    <Link
-      href="/area"
-      className="transition hover:text-white/60"
-    >
-      AREA
-    </Link>
-
-   <Link
-  href="/rules"
-  className="transition hover:text-white/60"
->
-  Rules
-</Link>
-
-<Link
-  href="/privacy"
-  className="transition hover:text-white/60"
->
-  Privacy
-</Link>
-
-<Link
-  href="/content-policy"
-  className="transition hover:text-white/60"
->
-  Content Policy
-</Link>
-  </div>
-
-  <p className="mt-2">
-    © 2026 AREA523
-  </p>
-</footer>
           </aside>
         </div>
       </div>
