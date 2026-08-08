@@ -7,6 +7,7 @@ import PostCard, {
 import Sidebar from "@/components/Sidebar";
 import MonthlyRankingWidget from "@/components/MonthlyRankingWidget";
 import { createClient } from "@/lib/supabase/server";
+import AreaLaunchCard from "@/components/AreaLaunchCard";
 
 type BoardRelation = {
   name: string;
@@ -285,11 +286,48 @@ export default async function Home() {
               </div>
             </section>
 
-            <footer className="px-3 text-xs leading-5 text-white/25">
-              About · Rules · Privacy · Content Policy
-              <br />
-              © 2026 AREA523
-            </footer>
+          <footer className="px-3 text-xs leading-5 text-white/25">
+  <div className="flex flex-wrap gap-x-3 gap-y-1">
+    <Link
+      href="/about"
+      className="transition hover:text-white/60"
+    >
+      About
+    </Link>
+
+    <Link
+      href="/area"
+      className="transition hover:text-white/60"
+    >
+      AREA
+    </Link>
+
+   <Link
+  href="/rules"
+  className="transition hover:text-white/60"
+>
+  Rules
+</Link>
+
+<Link
+  href="/privacy"
+  className="transition hover:text-white/60"
+>
+  Privacy
+</Link>
+
+<Link
+  href="/content-policy"
+  className="transition hover:text-white/60"
+>
+  Content Policy
+</Link>
+  </div>
+
+  <p className="mt-2">
+    © 2026 AREA523
+  </p>
+</footer>
           </aside>
         </div>
       </div>
