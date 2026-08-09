@@ -137,8 +137,9 @@ export default async function BoardPage({
         comment_count,
         repost_count,
         created_at,
-        author:profiles!posts_author_id_fkey (
-          username
+        author:profiles (
+         username,
+         avatar_url
         ),
         board:boards!posts_board_id_fkey (
           name,

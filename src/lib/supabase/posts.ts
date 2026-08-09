@@ -4,10 +4,7 @@ export type CreatePostInput = {
   boardSlug: string;
   title: string;
   description: string;
-  sourceUrl: string;
   location: string;
-  capturedAt: string;
-  isOriginalMedia: boolean;
   mediaUrl?: string | null;
   mediaType?: "image" | "video" | null;
 };
@@ -76,10 +73,10 @@ if (profile?.is_suspended) {
         description: input.description.trim(),
         media_url: input.mediaUrl ?? null,
         media_type: input.mediaType ?? null,
-        source_url: input.sourceUrl.trim() || null,
+        source_url: null,
         location: input.location.trim() || null,
-        captured_at: input.capturedAt || null,
-        is_original_media: input.isOriginalMedia,
+        captured_at: null,
+        is_original_media: false,
       })
       .select("id");
 

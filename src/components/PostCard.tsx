@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useState } from "react";
@@ -7,6 +7,7 @@ import VerifiedBadge from "@/components/VerifiedBadge";
 
 export type PostAuthorRelation = {
   username: string;
+  avatar_url: string | null;
 };
 
 export type PostBoardRelation = {
@@ -198,6 +199,8 @@ export default function PostCard({
   const authorName =
     post.author?.username ??
     post.author_id.slice(0, 8);
+  const authorInitial =
+   authorName.charAt(0).toUpperCase();
 
   async function handleVote(vote: VoteValue) {
     if (pendingVote || votingFinalized) {
@@ -351,96 +354,66 @@ if (!response.ok || !result.success) {
       />
 
       <div className="pointer-events-none relative z-10 flex">
-        <div className="flex w-[74px] shrink-0 flex-col items-center gap-2 border-r border-white/[0.06] bg-black/10 px-2 py-4">
-          <button
-            type="button"
-            disabled={
-              pendingVote !== null ||
-              votingFinalized
-            }
-            onClick={() =>
-              handleVote("REAL")
-            }
-            aria-label="Vote REAL"
-            aria-pressed={
-              selectedVote === "REAL"
-            }
-            className={`pointer-events-auto w-full rounded-md px-2 py-2 text-[11px] font-black transition ${
-              selectedVote === "REAL"
-                ? "bg-emerald-400/20 text-emerald-300"
-                : "bg-white/[0.04] text-white/45 hover:bg-emerald-400/10 hover:text-emerald-300"
-            } disabled:cursor-not-allowed disabled:opacity-40`}
-          >
-            {pendingVote === "REAL"
-              ? "..."
-              : "REAL"}
-          </button>
-
-          <span className="text-sm font-black text-white/80">
-            {totalVotes}
-          </span>
-
-          <button
-            type="button"
-            disabled={
-              pendingVote !== null ||
-              votingFinalized
-            }
-            onClick={() =>
-              handleVote("AI")
-            }
-            aria-label="Vote AI"
-            aria-pressed={
-              selectedVote === "AI"
-            }
-            className={`pointer-events-auto w-full rounded-md px-2 py-2 text-[11px] font-black transition ${
-              selectedVote === "AI"
-                ? "bg-red-400/20 text-red-300"
-                : "bg-white/[0.04] text-white/45 hover:bg-red-400/10 hover:text-red-300"
-            } disabled:cursor-not-allowed disabled:opacity-40`}
-          >
-            {pendingVote === "AI"
-              ? "..."
-              : "AI"}
-          </button>
-        </div>
 
         <div className="min-w-0 flex-1 p-4">
-          <div className="flex flex-wrap items-center gap-2 text-xs text-white/40">
-            {post.board && (
-              <Link
-                href={boardHref}
-                className="pointer-events-auto rounded-full bg-[#48a7ff]/10 px-2 py-1 font-bold tracking-wide text-[#69b7ff] transition hover:bg-[#48a7ff]/20"
-              >
-                {post.board.name}
-              </Link>
-            )}
+       <div className="flex items-start gap-3">
+  <Link
+    href={`/profile/${encodeURIComponent(authorName)}`}
+    className="pointer-events-auto shrink-0"
+    aria-label={`Open ${authorName}'s profile`}
+  >
+    {post.author?.avatar_url ? (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={post.author.avatar_url}
+        alt={`${authorName} profile`}
+        className="h-10 w-10 rounded-full border border-white/10 object-cover transition hover:border-[#48a7ff]/50"
+      />
+    ) : (
+      <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-[#17304a] text-sm font-black text-[#69b7ff]">
+        {authorInitial}
+      </div>
+    )}
+  </Link>
 
-            {totalVotes >= 10 && (
-              <span className="rounded-full bg-amber-400/10 px-2 py-1 font-bold text-amber-300">
-                TOP REPORT
-              </span>
-            )}
+  <div className="min-w-0 flex-1">
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+  <Link
+    href={`/profile/${encodeURIComponent(authorName)}`}
+    className="pointer-events-auto truncate text-sm font-bold text-white/85 transition hover:text-[#69b7ff]"
+  >
+    @{authorName}
+  </Link>
 
-            <Link
-              href={`/profile/${encodeURIComponent(
-                authorName,
-              )}`}
-              className="pointer-events-auto transition hover:text-[#69b7ff]"
-            >
-              Posted by u/{authorName}
-            </Link>
+  <span className="text-xs text-white/35">
+    {formatRelativeTime(post.created_at)}
+  </span>
 
-            <span aria-hidden="true">
-              ·
-            </span>
+  {post.board && (
+    <Link
+      href={boardHref}
+      className="pointer-events-auto rounded-full bg-[#48a7ff]/10 px-2 py-0.5 text-[10px] font-bold text-[#69b7ff] transition hover:bg-[#48a7ff]/20"
+    >
+      {post.board.name}
+    </Link>
+  )}
 
-            <span>
-              {formatRelativeTime(
-                post.created_at,
-              )}
-            </span>
-          </div>
+  {totalVotes >= 10 && (
+    <span className="rounded-full bg-amber-400/10 px-2 py-0.5 text-[10px] font-bold text-amber-300">
+      TOP REPORT
+    </span>
+  )}
+</div>
+
+      {totalVotes >= 10 && (
+        <span className="rounded-full bg-amber-400/10 px-2 py-0.5 text-[10px] font-bold text-amber-300">
+          TOP REPORT
+        </span>
+      )}
+    </div>
+  </div>
+</div>
 
           <h2 className="mt-3 break-words text-lg font-bold leading-6 text-white transition group-hover:text-[#8bc8ff]">
             {post.title}
@@ -509,66 +482,81 @@ if (!response.ok || !result.success) {
             </div>
           )}
 
-          <div className="mt-4 flex flex-wrap items-center gap-1 text-xs font-semibold text-white/40">
-            <Link
-              href={`${postHref}#comments`}
-              aria-label={`${comments} comments`}
-              title="Comments"
-              className="pointer-events-auto inline-flex h-9 items-center gap-1.5 rounded-full px-3 transition hover:bg-white/[0.07] hover:text-white"
-            >
-              <CommentIcon />
+         <div className="mt-4 flex flex-wrap items-center gap-1 text-xs font-semibold text-white/40">
+  <Link
+    href={`${postHref}#comments`}
+    aria-label={`${comments} comments`}
+    title="Comments"
+    className="pointer-events-auto inline-flex h-9 items-center gap-1.5 rounded-full px-3 transition hover:bg-white/[0.07] hover:text-white"
+  >
+    <CommentIcon />
+    <span>{comments}</span>
+  </Link>
 
-              <span>{comments}</span>
-            </Link>
+  <button
+    type="button"
+    onClick={() => void handleVote("REAL")}
+    disabled={pendingVote !== null || votingFinalized}
+    aria-label="Vote REAL"
+    aria-pressed={selectedVote === "REAL"}
+    className={`pointer-events-auto inline-flex h-9 items-center rounded-full px-3 transition ${
+      selectedVote === "REAL"
+        ? "bg-emerald-400/15 text-emerald-300"
+        : "text-emerald-300/70 hover:bg-emerald-400/10 hover:text-emerald-300"
+    } disabled:cursor-not-allowed disabled:opacity-40`}
+  >
+    {pendingVote === "REAL"
+      ? "..."
+      : `REAL ${realVotes}`}
+  </button>
 
-            <span className="rounded-full px-3 py-2 text-emerald-300/70">
-              REAL {realVotes}
-            </span>
+  <button
+    type="button"
+    onClick={() => void handleVote("AI")}
+    disabled={pendingVote !== null || votingFinalized}
+    aria-label="Vote AI"
+    aria-pressed={selectedVote === "AI"}
+    className={`pointer-events-auto inline-flex h-9 items-center rounded-full px-3 transition ${
+      selectedVote === "AI"
+        ? "bg-red-400/15 text-red-300"
+        : "text-red-300/70 hover:bg-red-400/10 hover:text-red-300"
+    } disabled:cursor-not-allowed disabled:opacity-40`}
+  >
+    {pendingVote === "AI"
+      ? "..."
+      : `AI ${aiVotes}`}
+  </button>
 
-            <span className="rounded-full px-3 py-2 text-red-300/70">
-              AI {aiVotes}
-            </span>
+  <button
+    type="button"
+    onClick={() => void handleRepost()}
+    disabled={pendingRepost}
+    aria-label={reposted ? "Undo repost" : "Repost"}
+    aria-pressed={reposted}
+    title={reposted ? "Undo repost" : "Repost"}
+    className={`pointer-events-auto inline-flex h-9 items-center gap-1.5 rounded-full px-3 transition ${
+      reposted
+        ? "bg-[#48a7ff]/12 text-[#69b7ff]"
+        : "text-white/40 hover:bg-white/[0.07] hover:text-white"
+    } disabled:cursor-not-allowed disabled:opacity-40`}
+  >
+    <RepostIcon />
 
-            <button
-              type="button"
-              onClick={handleRepost}
-              disabled={pendingRepost}
-              aria-label={
-                reposted
-                  ? "Undo repost"
-                  : "Repost"
-              }
-              aria-pressed={reposted}
-              title={
-                reposted
-                  ? "Undo repost"
-                  : "Repost"
-              }
-              className={`pointer-events-auto inline-flex h-9 items-center gap-1.5 rounded-full px-3 transition ${
-                reposted
-                  ? "bg-[#48a7ff]/12 text-[#69b7ff]"
-                  : "text-white/40 hover:bg-white/[0.07] hover:text-white"
-              } disabled:cursor-not-allowed disabled:opacity-40`}
-            >
-              <RepostIcon />
+    <span>
+      {pendingRepost ? "..." : repostCount}
+    </span>
+  </button>
 
-              <span>
-                {pendingRepost
-                  ? "..."
-                  : repostCount}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleShare}
-              aria-label="Share post"
-              title="Share"
-              className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full text-white/40 transition hover:bg-white/[0.07] hover:text-white"
-            >
-              <ShareIcon />
-            </button>
-          </div>
+  <button
+    type="button"
+    onClick={() => void handleShare()}
+    aria-label="Share post"
+    title="Share"
+    className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full text-white/40 transition hover:bg-white/[0.07] hover:text-white"
+  >
+    <ShareIcon />
+  </button>
+</div>
         </div>
       </div>
     </article>

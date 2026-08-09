@@ -205,8 +205,9 @@ const {
    created_at,
    verification_status,
    verification_admin_override,
-    author:profiles!posts_author_id_fkey (
-      username
+   author:profiles (
+     username,
+     avatar_url
     ),
     board:boards!posts_board_id_fkey (
       name,

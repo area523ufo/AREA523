@@ -141,68 +141,54 @@ export default function VoteSection({
 
     setIsSubmitting(true);
 
-    const previousVote = selectedVote;
+   const response = await fetch("/api/vote", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    postId,
+    vote:
+      nextVote === "real"
+        ? "REAL"
+        : "AI",
+  }),
+});
 
-    let error: { message: string } | null = null;
-    let newVoteId = voteId;
+const result = await response.json();
 
-    if (voteId) {
-      const result = await supabase
-        .from("votes")
-        .update({
-          vote: nextVote,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", voteId)
-        .eq("user_id", userId);
+if (!response.ok || !result.success) {
+  console.error(
+    "Failed to submit vote:",
+    result,
+  );
 
-      error = result.error;
-    } else {
-      const result = await supabase
-        .from("votes")
-        .insert({
-          post_id: postId,
-          user_id: userId,
-          vote: nextVote,
-        })
-        .select("id")
-        .single();
+  setMessage(
+    result.error ??
+      "The vote could not be processed.",
+  );
 
-      error = result.error;
-      newVoteId = result.data?.id ?? null;
-    }
-
-    if (error) {
-      console.error("Failed to submit vote:", error);
-      setMessage(`Vote failed: ${error.message}`);
-      setIsSubmitting(false);
-      return;
-    }
+  setIsSubmitting(false);
+  return;
+}
 
     /*
      * 화면을 즉시 갱신한다.
      * REAL → AI 또는 AI → REAL 변경도 반영한다.
      */
-    if (previousVote === "real") {
-      setRealVotes((current) => Math.max(current - 1, 0));
-    }
+   
+    setRealVotes(result.realVotes);
+setAiVotes(result.aiVotes);
 
-    if (previousVote === "ai") {
-      setAiVotes((current) => Math.max(current - 1, 0));
-    }
+setSelectedVote(
+  result.userVote === "REAL"
+    ? "real"
+    : "ai",
+);
 
-    if (nextVote === "real") {
-      setRealVotes((current) => current + 1);
-    }
+setMessage("Your vote has been recorded.");
+setIsSubmitting(false);
 
-    if (nextVote === "ai") {
-      setAiVotes((current) => current + 1);
-    }
-
-    setVoteId(newVoteId);
-    setSelectedVote(nextVote);
-    setMessage("Your vote has been recorded.");
-    setIsSubmitting(false);
   }
 
   const totalVotes = realVotes + aiVotes;

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-
+import ProfileAvatarEditor from "@/components/ProfileAvatarEditor";
 import Header from "@/components/Header";
 import PostCard, {
   type SupabasePostCard,
@@ -69,6 +69,10 @@ export default async function ProfilePage({
 
   const supabase = await createClient();
 
+const {
+  data: { user: currentUser },
+} = await supabase.auth.getUser();
+
   const {
     data: baseProfile,
     error: baseProfileError,
@@ -135,7 +139,8 @@ export default async function ProfilePage({
       repost_count,
       created_at,
       author:profiles (
-        username
+        username,
+        avatar_url
       ),
       board:boards (
         name,
@@ -164,6 +169,9 @@ export default async function ProfilePage({
 
   const profileInitial =
     profileName.charAt(0).toUpperCase();
+
+    const isOwnProfile =
+  currentUser?.id === profile.user_id;
 
   return (
     <main className="min-h-screen bg-[#0b0d10] text-[#e7e9ea]">
@@ -226,6 +234,14 @@ export default async function ProfilePage({
                     <p className="mt-1 text-sm text-white/40">
                       @{profile.username}
                     </p>
+
+                    {isOwnProfile && (
+  <ProfileAvatarEditor
+    userId={profile.user_id}
+    currentAvatarUrl={profile.avatar_url}
+    profileName={profileName}
+  />
+)}
                   </div>
                 </div>
 

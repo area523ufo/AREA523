@@ -14,11 +14,6 @@ const primaryLinks = [
     href: "/",
     icon: "↗",
   },
-  {
-    name: "MONTHLY RANKING",
-    href: "/leaderboard/monthly",
-    icon: "🏆",
-  },
 ];
 
 const boards = [

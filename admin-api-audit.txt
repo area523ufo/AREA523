@@ -1,0 +1,1319 @@
+﻿============================================================
+FILE: src\components\AdminPostActions.tsx
+============================================================
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
+type AdminPostActionsProps = {
+  postId: string;
+  removed: boolean;
+  adminOverride: boolean;
+};
+
+export default function AdminPostActions({
+  postId,
+  removed,
+  adminOverride,
+}: AdminPostActionsProps) {
+  const router = useRouter();
+
+  const [pendingAction, setPendingAction] =
+    useState<string | null>(null);
+
+  const [message, setMessage] =
+    useState<string | null>(null);
+
+  async function handleRemove() {
+    if (removed || pendingAction) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Remove this post from AREA523?",
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setPendingAction("remove");
+    setMessage(null);
+
+    try {
+      const response = await fetch(
+        "/api/admin/remove-post",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            postId,
+          }),
+        },
+      );
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        setMessage(
+          result.error ??
+            "The post could not be removed.",
+        );
+        return;
+      }
+
+      setMessage("Post removed.");
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+
+      setMessage(
+        "The post could not be removed.",
+      );
+    } finally {
+      setPendingAction(null);
+    }
+  }
+
+  async function handleForceVerify() {
+    if (removed || pendingAction) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Force this post to NOT AI VERIFIED?\n\nNo AREA rewards will be issued.",
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setPendingAction("verify");
+    setMessage(null);
+
+    try {
+      const response = await fetch(
+        "/api/admin/force-verify",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            postId,
+          }),
+        },
+      );
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        setMessage(
+          result.error ??
+            "The post could not be verified.",
+        );
+        return;
+      }
+
+      setMessage(
+        "Admin verification applied.",
+      );
+
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+
+      setMessage(
+        "The post could not be verified.",
+      );
+    } finally {
+      setPendingAction(null);
+    }
+  }
+
+  async function handleClearOverride() {
+    if (pendingAction) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Remove the admin verification override and return this post to automatic verification?",
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setPendingAction("clear");
+    setMessage(null);
+
+    try {
+      const response = await fetch(
+        "/api/admin/clear-verification",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            postId,
+          }),
+        },
+      );
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        setMessage(
+          result.error ??
+            "The verification override could not be removed.",
+        );
+        return;
+      }
+
+      setMessage(
+        "Admin override removed.",
+      );
+
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+
+      setMessage(
+        "The verification override could not be removed.",
+      );
+    } finally {
+      setPendingAction(null);
+    }
+  }
+
+  const pending =
+    pendingAction !== null;
+
+  return (
+    <div>
+      <div className="flex flex-wrap items-center gap-2">
+        {!removed &&
+          !adminOverride && (
+            <button
+              type="button"
+              onClick={() =>
+                void handleForceVerify()
+              }
+              disabled={pending}
+              className="rounded-full border border-[#48a7ff]/25 bg-[#48a7ff]/[0.06] px-4 py-2 text-xs font-black text-[#69b7ff] transition hover:bg-[#48a7ff]/[0.12] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {pendingAction === "verify"
+                ? "Verifying..."
+                : "Force Verified"}
+            </button>
+          )}
+
+        {!removed &&
+          adminOverride && (
+            <button
+              type="button"
+              onClick={() =>
+                void handleClearOverride()
+              }
+              disabled={pending}
+              className="rounded-full border border-amber-400/25 bg-amber-400/[0.05] px-4 py-2 text-xs font-black text-amber-300 transition hover:bg-amber-400/[0.1] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {pendingAction === "clear"
+                ? "Removing..."
+                : "Remove Override"}
+            </button>
+          )}
+
+        {!removed && (
+          <button
+            type="button"
+            onClick={() =>
+              void handleRemove()
+            }
+            disabled={pending}
+            className="rounded-full border border-red-400/25 bg-red-400/[0.06] px-4 py-2 text-xs font-black text-red-300 transition hover:bg-red-400/[0.12] disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {pendingAction === "remove"
+              ? "Removing..."
+              : "Remove"}
+          </button>
+        )}
+
+        {removed && (
+          <span className="text-xs font-black text-red-300/60">
+            Removed
+          </span>
+        )}
+      </div>
+
+      {message && (
+        <p className="mt-2 text-xs font-semibold text-white/40">
+          {message}
+        </p>
+      )}
+    </div>
+  );
+}
+
+============================================================
+FILE: src\components\AdminReportActions.tsx
+============================================================
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
+type AdminReportActionsProps = {
+  reportId: string;
+  postId: string;
+  authorId: string | null;
+  reportStatus: string;
+  postRemoved: boolean;
+};
+
+export default function AdminReportActions({
+  reportId,
+  postId,
+  authorId,
+  reportStatus,
+  postRemoved,
+}: AdminReportActionsProps) {
+  const router = useRouter();
+
+  const [pendingAction, setPendingAction] =
+    useState<string | null>(null);
+
+  const [message, setMessage] =
+    useState<string | null>(null);
+
+  async function removePost() {
+    const confirmed = window.confirm(
+      "Remove this post from AREA523?",
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setPendingAction("remove");
+    setMessage(null);
+
+    try {
+      const response = await fetch(
+        "/api/admin/remove-post",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            postId,
+          }),
+        },
+      );
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        setMessage(
+          result.error ??
+            "The post could not be removed.",
+        );
+        return;
+      }
+
+      setMessage("Post removed.");
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      setMessage(
+        "The post could not be removed.",
+      );
+    } finally {
+      setPendingAction(null);
+    }
+  }
+
+  async function suspendAuthor() {
+    if (!authorId) {
+      setMessage(
+        "The post author could not be identified.",
+      );
+      return;
+    }
+
+    const reason = window.prompt(
+      "Reason for suspending this user:",
+    );
+
+    if (reason === null) {
+      return;
+    }
+
+    setPendingAction("suspend");
+    setMessage(null);
+
+    try {
+      const response = await fetch(
+        "/api/admin/suspend-user",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+       body: JSON.stringify({
+          userId: authorId,
+          suspended: true,
+          reason: reason.trim(),
+}),
+        },
+      );
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        setMessage(
+          result.error ??
+            "The user could not be suspended.",
+        );
+        return;
+      }
+
+      setMessage("Author suspended.");
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      setMessage(
+        "The user could not be suspended.",
+      );
+    } finally {
+      setPendingAction(null);
+    }
+  }
+
+  async function updateReportStatus(
+    status: "reviewed" | "dismissed",
+  ) {
+    setPendingAction(status);
+    setMessage(null);
+
+    try {
+      const response = await fetch(
+        "/api/admin/report-status",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            reportId,
+            status,
+          }),
+        },
+      );
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        setMessage(
+          result.error ??
+            "The report could not be updated.",
+        );
+        return;
+      }
+
+      setMessage(
+        status === "reviewed"
+          ? "Report marked as reviewed."
+          : "Report dismissed.",
+      );
+
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+
+      setMessage(
+        "The report could not be updated.",
+      );
+    } finally {
+      setPendingAction(null);
+    }
+  }
+
+  const pending = pendingAction !== null;
+
+  return (
+    <div className="mt-5">
+      <div className="flex flex-wrap gap-2">
+        {!postRemoved && (
+          <button
+            type="button"
+            onClick={() => void removePost()}
+            disabled={pending}
+            className="rounded-full border border-red-400/25 bg-red-400/[0.06] px-4 py-2 text-xs font-black text-red-300 transition hover:bg-red-400/[0.12] disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {pendingAction === "remove"
+              ? "Removing..."
+              : "Remove Post"}
+          </button>
+        )}
+
+        {authorId && (
+          <button
+            type="button"
+            onClick={() =>
+              void suspendAuthor()
+            }
+            disabled={pending}
+            className="rounded-full border border-amber-400/25 bg-amber-400/[0.05] px-4 py-2 text-xs font-black text-amber-300 transition hover:bg-amber-400/[0.1] disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {pendingAction === "suspend"
+              ? "Suspending..."
+              : "Suspend Author"}
+          </button>
+        )}
+
+        {reportStatus === "pending" && (
+          <>
+            <button
+              type="button"
+              onClick={() =>
+                void updateReportStatus(
+                  "reviewed",
+                )
+              }
+              disabled={pending}
+              className="rounded-full border border-[#48a7ff]/25 bg-[#48a7ff]/5 px-4 py-2 text-xs font-black text-[#69b7ff] transition hover:bg-[#48a7ff]/10 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {pendingAction === "reviewed"
+                ? "Updating..."
+                : "Mark Reviewed"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() =>
+                void updateReportStatus(
+                  "dismissed",
+                )
+              }
+              disabled={pending}
+              className="rounded-full border border-white/10 px-4 py-2 text-xs font-black text-white/40 transition hover:bg-white/[0.06] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {pendingAction === "dismissed"
+                ? "Updating..."
+                : "Dismiss"}
+            </button>
+          </>
+        )}
+      </div>
+
+      {message && (
+        <p className="mt-3 text-xs font-semibold text-white/45">
+          {message}
+        </p>
+      )}
+    </div>
+  );
+}
+
+============================================================
+FILE: src\components\AdminUserActions.tsx
+============================================================
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
+type AdminUserActionsProps = {
+  userId: string;
+  username: string;
+  suspended: boolean;
+  isAdmin: boolean;
+};
+
+export default function AdminUserActions({
+  userId,
+  username,
+  suspended,
+  isAdmin,
+}: AdminUserActionsProps) {
+  const router = useRouter();
+
+  const [pending, setPending] =
+    useState(false);
+
+  const [message, setMessage] =
+    useState<string | null>(null);
+
+  async function changeSuspension() {
+    if (pending || isAdmin) {
+      return;
+    }
+
+    let reason = "";
+
+    if (!suspended) {
+      const enteredReason = window.prompt(
+        `Reason for suspending @${username}:`,
+      );
+
+      if (enteredReason === null) {
+        return;
+      }
+
+      reason = enteredReason.trim();
+
+      const confirmed = window.confirm(
+        `Suspend @${username}?`,
+      );
+
+      if (!confirmed) {
+        return;
+      }
+    } else {
+      const confirmed = window.confirm(
+        `Restore @${username}'s account?`,
+      );
+
+      if (!confirmed) {
+        return;
+      }
+    }
+
+    setPending(true);
+    setMessage(null);
+
+    try {
+      const response = await fetch(
+        "/api/admin/suspend-user",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            userId,
+            suspended: !suspended,
+            reason,
+          }),
+        },
+      );
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        setMessage(
+          result.error ??
+            "User status could not be changed.",
+        );
+        return;
+      }
+
+      setMessage(
+        suspended
+          ? "User restored."
+          : "User suspended.",
+      );
+
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+
+      setMessage(
+        "User status could not be changed.",
+      );
+    } finally {
+      setPending(false);
+    }
+  }
+
+  if (isAdmin) {
+    return (
+      <span className="text-xs font-black text-[#69b7ff]">
+        ADMIN
+      </span>
+    );
+  }
+
+  return (
+    <div>
+      <button
+        type="button"
+        disabled={pending}
+        onClick={() =>
+          void changeSuspension()
+        }
+        className={
+          suspended
+            ? "rounded-full border border-emerald-400/25 bg-emerald-400/[0.06] px-4 py-2 text-xs font-black text-emerald-300 transition hover:bg-emerald-400/[0.12] disabled:opacity-40"
+            : "rounded-full border border-red-400/25 bg-red-400/[0.06] px-4 py-2 text-xs font-black text-red-300 transition hover:bg-red-400/[0.12] disabled:opacity-40"
+        }
+      >
+        {pending
+          ? "Updating..."
+          : suspended
+            ? "Unsuspend"
+            : "Suspend"}
+      </button>
+
+      {message && (
+        <p className="mt-2 text-xs font-semibold text-white/40">
+          {message}
+        </p>
+      )}
+    </div>
+  );
+}
+
+============================================================
+FILE: src\app\api\admin\clear-verification\route.ts
+============================================================
+import { NextResponse } from "next/server";
+
+import { createClient } from "@/lib/supabase/server";
+
+export async function POST(request: Request) {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Authentication required.",
+        },
+        {
+          status: 401,
+        },
+      );
+    }
+
+    const body = await request.json();
+
+    const postId =
+      typeof body.postId === "string"
+        ? body.postId.trim()
+        : "";
+
+    if (!postId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Post ID is required.",
+        },
+        {
+          status: 400,
+        },
+      );
+    }
+
+    const { data, error } = await supabase.rpc(
+      "admin_clear_verification_override",
+      {
+        p_post_id: postId,
+      },
+    );
+
+    if (error) {
+      console.error(
+        "admin_clear_verification_override failed:",
+        error,
+      );
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: error.message,
+        },
+        {
+          status: 500,
+        },
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      result: data,
+    });
+  } catch (error) {
+    console.error(
+      "Clear verification API failed:",
+      error,
+    );
+
+    return NextResponse.json(
+      {
+        success: false,
+        error:
+          "The verification override could not be removed.",
+      },
+      {
+        status: 500,
+      },
+    );
+  }
+}
+
+============================================================
+FILE: src\app\api\admin\force-verify\route.ts
+============================================================
+import { NextResponse } from "next/server";
+
+import { createClient } from "@/lib/supabase/server";
+
+export async function POST(request: Request) {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Authentication required.",
+        },
+        {
+          status: 401,
+        },
+      );
+    }
+
+    const body = await request.json();
+
+    const postId =
+      typeof body.postId === "string"
+        ? body.postId.trim()
+        : "";
+
+    if (!postId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Post ID is required.",
+        },
+        {
+          status: 400,
+        },
+      );
+    }
+
+    const { data, error } = await supabase.rpc(
+      "admin_force_verify_post",
+      {
+        p_post_id: postId,
+      },
+    );
+
+    if (error) {
+      console.error(
+        "admin_force_verify_post failed:",
+        error,
+      );
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: error.message,
+        },
+        {
+          status: 500,
+        },
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      result: data,
+    });
+  } catch (error) {
+    console.error(
+      "Force verify API failed:",
+      error,
+    );
+
+    return NextResponse.json(
+      {
+        success: false,
+        error:
+          "The post could not be verified.",
+      },
+      {
+        status: 500,
+      },
+    );
+  }
+}
+
+============================================================
+FILE: src\app\api\admin\remove-post\route.ts
+============================================================
+import { NextResponse } from "next/server";
+
+import { createClient } from "@/lib/supabase/server";
+
+export async function POST(request: Request) {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: "Authentication required." },
+        { status: 401 },
+      );
+    }
+
+    const body = await request.json();
+
+    const postId =
+      typeof body.postId === "string"
+        ? body.postId.trim()
+        : "";
+
+    if (!postId) {
+      return NextResponse.json(
+        { success: false, error: "Post ID is required." },
+        { status: 400 },
+      );
+    }
+
+    const { data, error } = await supabase.rpc(
+      "admin_remove_post",
+      {
+        p_post_id: postId,
+      },
+    );
+
+    if (error) {
+      console.error("admin_remove_post failed:", error);
+
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: 500 },
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      result: data,
+    });
+  } catch (error) {
+    console.error("Admin remove post API failed:", error);
+
+    return NextResponse.json(
+      { success: false, error: "The post could not be removed." },
+      { status: 500 },
+    );
+  }
+}
+
+============================================================
+FILE: src\app\api\admin\report-status\route.ts
+============================================================
+import { NextResponse } from "next/server";
+
+import { createClient } from "@/lib/supabase/server";
+
+export async function POST(request: Request) {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: "Authentication required." },
+        { status: 401 },
+      );
+    }
+
+    const body = await request.json();
+
+    const reportId =
+      typeof body.reportId === "string"
+        ? body.reportId.trim()
+        : "";
+
+    const status =
+      typeof body.status === "string"
+        ? body.status.trim()
+        : "";
+
+    if (!reportId) {
+      return NextResponse.json(
+        { success: false, error: "Report ID is required." },
+        { status: 400 },
+      );
+    }
+
+    if (!["reviewed", "dismissed"].includes(status)) {
+      return NextResponse.json(
+        { success: false, error: "Invalid report status." },
+        { status: 400 },
+      );
+    }
+
+    const { data, error } = await supabase.rpc(
+      "admin_update_report_status",
+      {
+        p_report_id: reportId,
+        p_status: status,
+      },
+    );
+
+    if (error) {
+      console.error(
+        "admin_update_report_status failed:",
+        error,
+      );
+
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: 500 },
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      result: data,
+    });
+  } catch (error) {
+    console.error(
+      "Admin report status API failed:",
+      error,
+    );
+
+    return NextResponse.json(
+      { success: false, error: "The report could not be updated." },
+      { status: 500 },
+    );
+  }
+}
+
+============================================================
+FILE: src\app\api\admin\suspend-user\route.ts
+============================================================
+import { NextResponse } from "next/server";
+
+import { createClient } from "@/lib/supabase/server";
+
+export async function POST(request: Request) {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Authentication required.",
+        },
+        { status: 401 },
+      );
+    }
+
+    const body = await request.json();
+
+    const userId =
+      typeof body.userId === "string"
+        ? body.userId.trim()
+        : "";
+
+    const suspended =
+      typeof body.suspended === "boolean"
+        ? body.suspended
+        : true;
+
+    const reason =
+      typeof body.reason === "string"
+        ? body.reason.trim()
+        : "";
+
+    if (!userId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "User ID is required.",
+        },
+        { status: 400 },
+      );
+    }
+
+    const { data, error } = await supabase.rpc(
+      "admin_set_user_suspension",
+      {
+        p_user_id: userId,
+        p_suspended: suspended,
+        p_reason:
+          suspended && reason
+            ? reason
+            : null,
+      },
+    );
+
+    if (error) {
+      console.error(
+        "admin_set_user_suspension failed:",
+        error,
+      );
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: error.message,
+        },
+        { status: 500 },
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      result: data,
+    });
+  } catch (error) {
+    console.error(
+      "Admin suspension API failed:",
+      error,
+    );
+
+    return NextResponse.json(
+      {
+        success: false,
+        error:
+          "The user status could not be changed.",
+      },
+      { status: 500 },
+    );
+  }
+}
+
+============================================================
+FILE: src\app\api\report\route.ts
+============================================================
+import { NextResponse } from "next/server";
+
+import { createClient } from "@/lib/supabase/server";
+
+export async function POST(request: Request) {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "You must be signed in to report a post.",
+        },
+        {
+          status: 401,
+        },
+      );
+    }
+
+    const body = await request.json();
+
+    const postId =
+      typeof body.postId === "string"
+        ? body.postId.trim()
+        : "";
+
+    const reason =
+      typeof body.reason === "string"
+        ? body.reason.trim()
+        : "";
+
+    if (!postId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Post ID is required.",
+        },
+        {
+          status: 400,
+        },
+      );
+    }
+
+    if (!reason) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Please enter a reason for the report.",
+        },
+        {
+          status: 400,
+        },
+      );
+    }
+
+    if (reason.length > 500) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Report reason must be 500 characters or fewer.",
+        },
+        {
+          status: 400,
+        },
+      );
+    }
+
+    const { data, error } = await supabase.rpc(
+      "report_post",
+      {
+        p_post_id: postId,
+        p_reason: reason,
+      },
+    );
+
+    if (error) {
+      console.error("Report RPC failed:", error);
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: error.message,
+        },
+        {
+          status: 500,
+        },
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      result: data,
+    });
+  } catch (error) {
+    console.error("Report API failed:", error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: "The report could not be submitted.",
+      },
+      {
+        status: 500,
+      },
+    );
+  }
+}
+
+============================================================
+FILE: src\app\api\repost\route.ts
+============================================================
+import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+
+export async function POST(req: Request) {
+  try {
+    const { postId } = await req.json();
+
+    if (!postId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Missing postId",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unauthorized",
+        },
+        {
+          status: 401,
+        }
+      );
+    }
+
+    const { data, error } = await supabase.rpc(
+      "toggle_post_repost",
+      {
+        p_post_id: postId,
+      }
+    );
+
+    if (error) {
+      if (
+  error.message.includes(
+    "ACCOUNT_SUSPENDED",
+  )
+) {
+  return NextResponse.json(
+    {
+      success: false,
+      error:
+        "Your account is suspended.",
+    },
+    {
+      status: 403,
+    },
+  );
+}
+      return NextResponse.json(
+        {
+          success: false,
+          error: error.message,
+        },
+        {
+          status: 500,
+        }
+      );
+    }
+
+    return NextResponse.json(data);
+  } catch {
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Internal Server Error",
+      },
+      {
+        status: 500,
+      }
+    );
+  }
+}
+

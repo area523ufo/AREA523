@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { createPost } from "@/lib/supabase/posts";
 import {
@@ -39,10 +40,7 @@ export default function CreatePostForm() {
   const [board, setBoard] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [source, setSource] = useState("");
   const [location, setLocation] = useState("");
-  const [captureDate, setCaptureDate] = useState("");
-  const [originalMedia, setOriginalMedia] = useState(false);
 
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -179,21 +177,70 @@ export default function CreatePostForm() {
     console.log("About to create post");
 
     try {
+      let uploadedMediaUrl: string | null = null;
+
+if (mediaFile) {
+  const supabase = createClient();
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError) {
+    throw new Error(userError.message);
+  }
+
+  if (!user) {
+    throw new Error(
+      "You must be logged in to upload media.",
+    );
+  }
+
+  const extension =
+    mediaFile.name
+      .split(".")
+      .pop()
+      ?.toLowerCase() || "bin";
+
+  const filePath =
+    `${user.id}/${crypto.randomUUID()}.${extension}`;
+
+  const { error: uploadError } =
+    await supabase.storage
+      .from("post-media")
+      .upload(filePath, mediaFile, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: mediaFile.type,
+      });
+
+  if (uploadError) {
+    throw new Error(
+      `Media upload failed: ${uploadError.message}`,
+    );
+  }
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage
+    .from("post-media")
+    .getPublicUrl(filePath);
+
+  uploadedMediaUrl = publicUrl;
+}
   const post = await createPost({
-    boardSlug: board,
-    title,
-    description,
-    sourceUrl: source,
-    location,
-    capturedAt: captureDate,
-    isOriginalMedia: originalMedia,
-    mediaUrl: null,
-    mediaType: mediaFile
-      ? mediaFile.type.startsWith("image/")
-        ? "image"
-        : "video"
-      : null,
-  });
+  boardSlug: board,
+  title,
+  description,
+  location,
+  mediaUrl: uploadedMediaUrl,
+  mediaType: mediaFile
+    ? mediaFile.type.startsWith("image/")
+      ? "image"
+      : "video"
+    : null,
+});
 
   router.push(`/post/${post.id}`);
 } catch (error: unknown) {
@@ -487,27 +534,6 @@ export default function CreatePostForm() {
           )}
         </div>
 
-        <div>
-          <label
-            htmlFor="source"
-            className="mb-2 block text-sm font-bold text-white/70"
-          >
-            Original Source
-          </label>
-
-          <input
-            id="source"
-            name="source"
-            type="url"
-            value={source}
-            onChange={(event) =>
-              setSource(event.target.value)
-            }
-            placeholder="https://"
-            className="w-full rounded-xl border border-white/10 bg-[#0b0d10] px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#48a7ff]/60"
-          />
-        </div>
-
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label
@@ -529,72 +555,7 @@ export default function CreatePostForm() {
               className="w-full rounded-xl border border-white/10 bg-[#0b0d10] px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-[#48a7ff]/60"
             />
           </div>
-
-          <div>
-            <label
-              htmlFor="captureDate"
-              className="mb-2 block text-sm font-bold text-white/70"
-            >
-              Capture Date
-            </label>
-
-            <input
-              id="captureDate"
-              name="captureDate"
-              type="date"
-              value={captureDate}
-              onChange={(event) =>
-                setCaptureDate(event.target.value)
-              }
-              className="w-full rounded-xl border border-white/10 bg-[#0b0d10] px-4 py-3 text-sm text-white outline-none focus:border-[#48a7ff]/60"
-            />
-          </div>
         </div>
-
-        <div className="rounded-xl border border-white/10 bg-white/[0.025] p-4">
-          <label className="flex cursor-pointer items-start gap-3">
-            <input
-              type="checkbox"
-              name="originalMedia"
-              checked={originalMedia}
-              onChange={(event) =>
-                setOriginalMedia(event.target.checked)
-              }
-              className="mt-1 h-4 w-4 accent-[#48a7ff]"
-            />
-
-            <span>
-              <span className="block text-sm font-bold text-white/70">
-                I captured this media
-              </span>
-
-              <span className="mt-1 block text-xs leading-5 text-white/35">
-                Select this only when you are the original
-                photographer or recorder.
-              </span>
-            </span>
-          </label>
-        </div>
-
-        <div className="rounded-xl border border-amber-400/15 bg-amber-400/[0.04] p-4">
-          <p className="text-xs font-black tracking-[0.16em] text-amber-300">
-            SUBMISSION NOTICE
-          </p>
-
-          <p className="mt-2 text-sm leading-6 text-white/45">
-            Uploading known AI-generated or edited media
-            without disclosure may result in removal and
-            account restrictions.
-          </p>
-        </div>
-
-        {formError && (
-          <div className="rounded-xl border border-red-400/20 bg-red-400/[0.06] px-4 py-3">
-            <p className="text-sm font-semibold text-red-300">
-              {formError}
-            </p>
-          </div>
-        )}
 
         <div className="flex flex-col-reverse gap-3 border-t border-white/10 pt-6 sm:flex-row sm:justify-end">
           <Link

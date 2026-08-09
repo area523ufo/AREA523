@@ -5,7 +5,6 @@ import PostCard, {
   type SupabasePostCard,
 } from "@/components/PostCard";
 import Sidebar from "@/components/Sidebar";
-import MonthlyRankingWidget from "@/components/MonthlyRankingWidget";
 import { createClient } from "@/lib/supabase/server";
 import AreaLaunchCard from "@/components/AreaLaunchCard";
 
@@ -16,6 +15,7 @@ type BoardRelation = {
 
 type AuthorRelation = {
   username: string;
+  avatar_url: string | null;
 };
 
 type RawPost = {
@@ -221,8 +221,6 @@ export default async function Home() {
           </section>
 
           <aside className="hidden space-y-4 xl:block">
-            <MonthlyRankingWidget />
-            
             <AreaLaunchCard />
 
             <section className="overflow-hidden rounded-xl border border-white/10 bg-[#12151a]">
@@ -260,21 +258,6 @@ export default async function Home() {
               </h3>
 
               <div className="mt-4 space-y-1">
-  {[
-    "UFO Sighting",
-    "Government",
-    "Alien",
-    "Video",
-    "Discussion",
-  ].map((tag) => (
-    <button
-      key={tag}
-      type="button"
-      className="flex w-full items-center rounded-lg px-3 py-2.5 text-sm text-white/55 transition hover:bg-white/[0.05] hover:text-white"
-    >
-      <span>#{tag}</span>
-    </button>
-  ))}
 </div>
             </section>
 
