@@ -196,14 +196,9 @@ export default async function BoardPage({
           <section className="min-w-0">
             <div className="mb-4 overflow-hidden rounded-xl border border-white/10 bg-[#12151a]">
               <div className="border-b border-white/10 bg-gradient-to-r from-[#17304a] to-[#101923] px-6 py-6">
-                <p className="text-xs font-black tracking-[0.22em] text-[#75bdff]">
-                  AREA523 BOARD
-                </p>
-
-                <h1 className="mt-2 text-3xl font-black text-white">
-                  {board.name}
-                </h1>
-
+                <h1 className="text-2xl font-black text-white">
+  {board.name} AREA
+</h1>
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-white/50">
                   {boardDescription}
                 </p>
@@ -305,26 +300,6 @@ export default async function BoardPage({
               <p className="mt-3 text-sm leading-6 text-white/50">
                 {boardDescription}
               </p>
-
-              <div className="mt-5 border-t border-white/10 pt-4">
-                <p className="text-sm font-bold text-white">
-                  Board Rules
-                </p>
-
-                <div className="mt-3 space-y-3 text-sm leading-5 text-white/45">
-                  <p>1. Add context and a clear source.</p>
-                  <p>
-                    2. Do not present speculation as confirmed
-                    fact.
-                  </p>
-                  <p>
-                    3. Disclose known edits or AI generation.
-                  </p>
-                  <p>
-                    4. Keep discussion focused on the media.
-                  </p>
-                </div>
-              </div>
             </section>
 
             <section className="rounded-xl border border-white/10 bg-[#12151a] p-5">

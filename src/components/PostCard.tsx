@@ -7,7 +7,7 @@ import VerifiedBadge from "@/components/VerifiedBadge";
 
 export type PostAuthorRelation = {
   username: string;
-  avatar_url: string | null;
+  avatar_url?: string | null;
 };
 
 export type PostBoardRelation = {

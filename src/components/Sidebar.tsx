@@ -88,7 +88,7 @@ export default function Sidebar() {
 
         <div>
           <p className="mb-2 px-3 text-[10px] font-black tracking-[0.18em] text-white/30">
-            BOARDS
+            AREAS
           </p>
 
           <div className="space-y-1">
@@ -117,14 +117,13 @@ export default function Sidebar() {
           </div>
         </div>
 
-        <div className="mt-auto border-t border-white/10 pt-4">
-          <button
-            type="button"
-            className="w-full rounded-lg border border-dashed border-white/15 px-3 py-3 text-left text-sm font-semibold text-white/40 transition hover:border-[#48a7ff]/40 hover:bg-[#48a7ff]/5 hover:text-[#69b7ff]"
-          >
-            + New Board
-          </button>
-        </div>
+       <Link
+  href="/area/create"
+  className="mb-3 flex items-center gap-2 rounded-xl border border-[#48a7ff]/20 bg-[#48a7ff]/[0.07] px-3 py-2.5 text-sm font-bold text-[#69b7ff] transition hover:border-[#48a7ff]/40 hover:bg-[#48a7ff]/[0.12]"
+>
+  <span className="text-lg leading-none">+</span>
+  <span>Create Area</span>
+</Link>
       </nav>
     </aside>
   );
