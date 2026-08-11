@@ -4,12 +4,19 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "worker:withdrawals": "tsx scripts/area-withdrawal-worker.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "worker:rewards": "tsx --env-file=.env.local workers/reward-worker.ts"
   },
   "dependencies": {
+    "@solana-program/token": "^0.15.0",
+    "@solana/kit": "^7.0.0",
+    "@solana/kit-plugin-rpc": "^0.16.0",
+    "@solana/kit-plugin-signer": "^0.13.0",
+    "@solana/kit-plugin-wallet": "^0.14.0",
+    "@solana/react": "^7.0.0",
     "@solana/spl-token": "^0.4.15",
     "@solana/web3.js": "^1.98.4",
     "@supabase/ssr": "^0.12.3",
@@ -18,7 +25,8 @@
     "dotenv": "^17.4.2",
     "next": "16.2.11",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -28,7 +36,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.11",
     "tailwindcss": "^4",
-    "tsx": "^4.23.11",
+    "tsx": "^4.23.12",
     "typescript": "^5"
   }
 }

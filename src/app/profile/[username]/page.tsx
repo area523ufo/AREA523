@@ -1,11 +1,15 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import ProfileAvatarEditor from "@/components/ProfileAvatarEditor";
+
+import AreaWithdrawalPanel from "@/components/AreaWithdrawalPanel";
 import Header from "@/components/Header";
 import PostCard, {
   type SupabasePostCard,
 } from "@/components/PostCard";
+import ProfileAvatarEditor from "@/components/ProfileAvatarEditor";
 import Sidebar from "@/components/Sidebar";
+import WithdrawalHistory from "@/components/WithdrawalHistory";
+
 import { createClient } from "@/lib/supabase/server";
 
 type Props = {
@@ -69,9 +73,9 @@ export default async function ProfilePage({
 
   const supabase = await createClient();
 
-const {
-  data: { user: currentUser },
-} = await supabase.auth.getUser();
+  const {
+    data: { user: currentUser },
+  } = await supabase.auth.getUser();
 
   const {
     data: baseProfile,
@@ -170,8 +174,8 @@ const {
   const profileInitial =
     profileName.charAt(0).toUpperCase();
 
-    const isOwnProfile =
-  currentUser?.id === profile.user_id;
+  const isOwnProfile =
+    currentUser?.id === profile.user_id;
 
   return (
     <main className="min-h-screen bg-[#0b0d10] text-[#e7e9ea]">
@@ -224,7 +228,8 @@ const {
                         {profileName}
                       </h1>
 
-                      {Number(profile.verified_reports) > 0 && (
+                      {Number(profile.verified_reports) >
+                        0 && (
                         <span className="rounded-full border border-[#48a7ff]/25 bg-[#48a7ff]/10 px-2.5 py-1 text-[10px] font-black tracking-wide text-[#75bdff]">
                           NOT AI VERIFIED
                         </span>
@@ -236,12 +241,14 @@ const {
                     </p>
 
                     {isOwnProfile && (
-  <ProfileAvatarEditor
-    userId={profile.user_id}
-    currentAvatarUrl={profile.avatar_url}
-    profileName={profileName}
-  />
-)}
+                      <ProfileAvatarEditor
+                        userId={profile.user_id}
+                        currentAvatarUrl={
+                          profile.avatar_url
+                        }
+                        profileName={profileName}
+                      />
+                    )}
                   </div>
                 </div>
 
@@ -306,44 +313,59 @@ const {
               />
             </section>
 
-          <section className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-  <div className="col-span-2">
-    <SecondaryStatCard
-      title="Earned AREA"
-      value={formatNumber(
-        profile.earned_area,
-      )}
-    />
-  </div>
+            <section className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+              <div className="col-span-2">
+                <SecondaryStatCard
+                  title="Earned AREA"
+                  value={formatNumber(
+                    profile.earned_area,
+                  )}
+                />
+              </div>
 
-  <SecondaryStatCard
-    title="Posts"
-    value={formatNumber(
-      profile.total_posts,
-    )}
-  />
+              <SecondaryStatCard
+                title="Posts"
+                value={formatNumber(
+                  profile.total_posts,
+                )}
+              />
 
-  <SecondaryStatCard
-    title="Comments"
-    value={formatNumber(
-      profile.total_comments,
-    )}
-  />
+              <SecondaryStatCard
+                title="Comments"
+                value={formatNumber(
+                  profile.total_comments,
+                )}
+              />
 
-  <SecondaryStatCard
-    title="Votes"
-    value={formatNumber(
-      profile.total_votes,
-    )}
-  />
+              <SecondaryStatCard
+                title="Votes"
+                value={formatNumber(
+                  profile.total_votes,
+                )}
+              />
 
-  <SecondaryStatCard
-    title="Correct"
-    value={formatNumber(
-      profile.correct_votes,
-    )}
-  />
-</section>
+              <SecondaryStatCard
+                title="Correct"
+                value={formatNumber(
+                  profile.correct_votes,
+                )}
+              />
+            </section>
+
+            {isOwnProfile && (
+              <div className="mt-5 space-y-4">
+                <AreaWithdrawalPanel
+                  areaBalance={Number(
+                    profile.area_balance ?? 0,
+                  )}
+                  walletAddress={
+                    profile.wallet_address
+                  }
+                />
+
+                <WithdrawalHistory />
+              </div>
+            )}
 
             <section className="mt-8">
               <div className="mb-4 flex items-end justify-between border-b border-white/10 pb-4">
