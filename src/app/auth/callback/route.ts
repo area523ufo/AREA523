@@ -6,17 +6,14 @@ export async function GET(
   request: Request,
 ) {
   const requestUrl =
-    new URL(request.url);
+    new URL(
+      request.url,
+    );
 
   const code =
     requestUrl.searchParams.get(
       "code",
     );
-
-  const next =
-    requestUrl.searchParams.get(
-      "next",
-    ) || "/";
 
   if (!code) {
     return NextResponse.redirect(
@@ -31,6 +28,7 @@ export async function GET(
     await createClient();
 
   const {
+    data,
     error,
   } =
     await supabase.auth
@@ -38,7 +36,10 @@ export async function GET(
         code,
       );
 
-  if (error) {
+  if (
+    error ||
+    !data.user
+  ) {
     console.error(
       "OAuth callback failed:",
       error,
@@ -52,11 +53,53 @@ export async function GET(
     );
   }
 
+  const {
+    data: profile,
+    error:
+      profileError,
+  } =
+    await supabase
+      .from("profiles")
+      .select(
+        "username, username_set",
+      )
+      .eq(
+        "id",
+        data.user.id,
+      )
+      .single();
+
+  if (
+    profileError ||
+    !profile
+  ) {
+    console.error(
+      "OAuth profile lookup failed:",
+      profileError,
+    );
+
+    return NextResponse.redirect(
+      new URL(
+        "/?auth_error=profile",
+        requestUrl.origin,
+      ),
+    );
+  }
+
+  if (
+    !profile.username_set
+  ) {
+    return NextResponse.redirect(
+      new URL(
+        "/choose-username",
+        requestUrl.origin,
+      ),
+    );
+  }
+
   return NextResponse.redirect(
     new URL(
-      next.startsWith("/")
-        ? next
-        : "/",
+      "/",
       requestUrl.origin,
     ),
   );
