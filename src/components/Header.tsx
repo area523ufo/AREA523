@@ -554,16 +554,19 @@ export default function Header() {
         </div>
       </header>
 
-      <MobileSidebar
-        open={
-          isMobileMenuOpen
-        }
-        onClose={() =>
-          setIsMobileMenuOpen(
-            false,
-          )
-        }
-      />
+     <MobileSidebar
+  open={
+    isMobileMenuOpen
+  }
+  onClose={() =>
+    setIsMobileMenuOpen(
+      false,
+    )
+  }
+  username={
+    user?.username ?? null
+  }
+/>
 
       <AuthModal
         isOpen={

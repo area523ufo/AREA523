@@ -1,17 +1,20 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 
 import Sidebar from "@/components/Sidebar";
 
 type MobileSidebarProps = {
   open: boolean;
   onClose: () => void;
+  username?: string | null;
 };
 
 export default function MobileSidebar({
   open,
   onClose,
+  username,
 }: MobileSidebarProps) {
   useEffect(() => {
     if (!open) {
@@ -73,6 +76,35 @@ export default function MobileSidebar({
             ×
           </button>
         </div>
+
+        {username && (
+          <div className="border-b border-white/10 px-3 py-3">
+            <Link
+              href={`/profile/${encodeURIComponent(
+                username,
+              )}`}
+              onClick={onClose}
+              className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.035] px-3 py-3 transition hover:bg-white/[0.06]"
+            >
+              <div className="min-w-0">
+                <p className="text-xs font-bold uppercase tracking-[0.12em] text-white/30">
+                  PROFILE
+                </p>
+
+                <p className="mt-1 truncate text-sm font-black text-white/85">
+                  u/{username}
+                </p>
+              </div>
+
+              <span
+                aria-hidden="true"
+                className="shrink-0 text-lg text-white/25"
+              >
+                ›
+              </span>
+            </Link>
+          </div>
+        )}
 
         <div onClick={onClose}>
           <Sidebar mobile />
