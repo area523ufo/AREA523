@@ -12,6 +12,8 @@ import {
   signUp,
 } from "@/lib/supabase/auth";
 
+import { createClient } from "@/lib/supabase/client";
+
 export type MockUser = {
   username: string;
   email: string;
@@ -208,12 +210,6 @@ export default function AuthModal({
           .trim()
           .toLowerCase();
 
-      const normalizedUsername =
-        username.trim() ||
-        normalizedEmail
-          .split("@")[0] ||
-        "area523_user";
-
       if (
         !normalizedEmail.includes(
           "@",
@@ -225,6 +221,16 @@ export default function AuthModal({
 
         return;
       }
+
+      /*
+       * Username is only needed
+       * while creating an account.
+       *
+       * Login must always use the
+       * username stored in profiles.
+       */
+      const normalizedUsername =
+        username.trim();
 
       if (
         mode ===
@@ -270,6 +276,11 @@ export default function AuthModal({
       );
 
       try {
+        /*
+         * -----------------------------------------
+         * SIGN UP
+         * -----------------------------------------
+         */
         if (
           mode ===
           "signup"
@@ -312,6 +323,11 @@ export default function AuthModal({
           return;
         }
 
+        /*
+         * -----------------------------------------
+         * EMAIL LOGIN
+         * -----------------------------------------
+         */
         const {
           data,
           error,
@@ -333,15 +349,97 @@ export default function AuthModal({
           return;
         }
 
+        const authenticatedUser =
+          data.user;
+
+        if (!authenticatedUser) {
+          setFormError(
+            "Authenticated user could not be loaded.",
+          );
+
+          setIsSubmitting(
+            false,
+          );
+
+          return;
+        }
+
+        /*
+         * IMPORTANT:
+         *
+         * profiles.username is the
+         * canonical AREA523 username.
+         *
+         * Never derive profile routes
+         * from email or auth metadata.
+         */
+        const supabase =
+          createClient();
+
+        const {
+          data: profile,
+          error:
+            profileError,
+        } =
+          await supabase
+            .from("profiles")
+            .select(
+              "username",
+            )
+            .eq(
+              "id",
+              authenticatedUser.id,
+            )
+            .maybeSingle();
+
+        if (
+          profileError
+        ) {
+          console.error(
+            "Profile lookup after login failed:",
+            profileError,
+          );
+
+          setFormError(
+            "Your profile could not be loaded.",
+          );
+
+          setIsSubmitting(
+            false,
+          );
+
+          return;
+        }
+
+        const profileUsername =
+          profile?.username
+            ?.trim();
+
+        if (
+          !profileUsername
+        ) {
+          console.error(
+            "Profile username missing after login:",
+            authenticatedUser.id,
+          );
+
+          setFormError(
+            "Your profile is not ready yet. Please try logging in again.",
+          );
+
+          setIsSubmitting(
+            false,
+          );
+
+          return;
+        }
+
         onAuthenticated({
           username:
-            data.user
-              .user_metadata
-              .username ??
-            normalizedUsername,
+            profileUsername,
 
           email:
-            data.user
+            authenticatedUser
               .email ??
             normalizedEmail,
         });
@@ -360,7 +458,9 @@ export default function AuthModal({
         );
 
         setFormError(
-          "Unexpected error.",
+          error instanceof Error
+            ? error.message
+            : "Unexpected error.",
         );
 
         setIsSubmitting(
