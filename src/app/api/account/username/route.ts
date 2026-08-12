@@ -163,20 +163,22 @@ export async function POST(
       );
     }
 
-    console.error(
-      "Username update failed:",
-      updateError,
-    );
+   console.error(
+  "Username update failed:",
+  updateError,
+);
 
-    return NextResponse.json(
-      {
-        error:
-          "Unable to set username.",
-      },
-      {
-        status: 500,
-      },
-    );
+return NextResponse.json(
+  {
+    error:
+      updateError.message,
+    code:
+      updateError.code,
+  },
+  {
+    status: 500,
+  },
+);
   }
 
   return NextResponse.json({
