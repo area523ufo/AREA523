@@ -2,7 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
 
 import AuthModal, {
@@ -14,6 +19,8 @@ import {
   getCurrentUser,
   signOut,
 } from "@/lib/supabase/auth";
+
+import { createClient } from "@/lib/supabase/client";
 
 type AuthMode = "login" | "signup";
 
@@ -47,63 +54,125 @@ export default function Header() {
   const profileMenuRef =
     useRef<HTMLDivElement | null>(null);
 
- useEffect(() => {
-  const loadUser = async () => {
-    const { data } =
-      await getCurrentUser();
+  /*
+   * Canonical authenticated user loader.
+   *
+   * IMPORTANT:
+   * Profile routes must always use
+   * public.profiles.username.
+   *
+   * Never derive a profile username
+   * from email or auth metadata.
+   */
+  const loadAuthenticatedUser =
+    useCallback(async () => {
+      try {
+        const {
+          data,
+          error:
+            authError,
+        } =
+          await getCurrentUser();
 
-    if (!data.user) {
-      setUser(null);
-      return;
-    }
+        if (authError) {
+          console.error(
+            "Failed to load authenticated user:",
+            authError,
+          );
 
-    const {
-      createClient,
-    } = await import(
-      "@/lib/supabase/client"
-    );
+          setUser(null);
+          return null;
+        }
 
-    const supabase =
-      createClient();
+        const authUser =
+          data.user;
 
-    const {
-      data: profile,
-      error,
-    } = await supabase
-      .from("profiles")
-      .select("username")
-      .eq("id", data.user.id)
-      .maybeSingle();
+        if (!authUser) {
+          setUser(null);
+          return null;
+        }
 
-    if (error) {
-      console.error(
-        "Failed to load profile username:",
-        error,
-      );
-    }
+        const supabase =
+          createClient();
 
-    const username =
-      profile?.username?.trim();
+        const {
+          data: profile,
+          error:
+            profileError,
+        } =
+          await supabase
+            .from("profiles")
+            .select("username")
+            .eq(
+              "id",
+              authUser.id,
+            )
+            .maybeSingle();
 
-    if (!username) {
-      console.error(
-        "Profile username not found for authenticated user:",
-        data.user.id,
-      );
+        if (profileError) {
+          console.error(
+            "Failed to load authenticated profile:",
+            profileError,
+          );
 
-      setUser(null);
-      return;
-    }
+          setUser(null);
+          return null;
+        }
 
-    setUser({
-      username,
-      email:
-        data.user.email ?? "",
-    });
-  };
+        const profileUsername =
+          profile?.username
+            ?.trim();
 
-  void loadUser();
-}, []);
+        if (!profileUsername) {
+          console.error(
+            "Authenticated user has no profile username:",
+            authUser.id,
+          );
+
+          setUser(null);
+          return null;
+        }
+
+        const authenticatedUser: MockUser =
+          {
+            username:
+              profileUsername,
+
+            email:
+              authUser.email ??
+              "",
+          };
+
+        setUser(
+          authenticatedUser,
+        );
+
+        return authenticatedUser;
+      } catch (error) {
+        console.error(
+          "Unexpected authenticated user load error:",
+          error,
+        );
+
+        setUser(null);
+        return null;
+      }
+    }, []);
+
+  /*
+   * Load session + canonical profile
+   * when Header mounts.
+   */
+  useEffect(() => {
+    void loadAuthenticatedUser();
+  }, [
+    loadAuthenticatedUser,
+  ]);
+
+  /*
+   * Close profile menu when clicking
+   * outside of it.
+   */
   useEffect(() => {
     const handleOutsideClick = (
       event: MouseEvent,
@@ -114,7 +183,9 @@ export default function Header() {
           event.target as Node,
         )
       ) {
-        setIsProfileMenuOpen(false);
+        setIsProfileMenuOpen(
+          false,
+        );
       }
     };
 
@@ -131,6 +202,9 @@ export default function Header() {
     };
   }, []);
 
+  /*
+   * Global auth modal event.
+   */
   useEffect(() => {
     function handleOpenAuth(
       event: Event,
@@ -140,14 +214,20 @@ export default function Header() {
           mode?: AuthMode;
         }>;
 
-      const mode =
-        customEvent.detail?.mode ===
+      const nextMode =
+        customEvent.detail
+          ?.mode ===
         "login"
           ? "login"
           : "signup";
 
-      setAuthMode(mode);
-      setIsAuthModalOpen(true);
+      setAuthMode(
+        nextMode,
+      );
+
+      setIsAuthModalOpen(
+        true,
+      );
     }
 
     window.addEventListener(
@@ -170,15 +250,32 @@ export default function Header() {
     setIsAuthModalOpen(true);
   };
 
-  const handleLogout = async () => {
-    await signOut();
+  const handleLogout =
+    async () => {
+      const {
+        error,
+      } =
+        await signOut();
 
-    setUser(null);
-    setIsProfileMenuOpen(false);
-    setIsMobileMenuOpen(false);
+      if (error) {
+        console.error(
+          "Logout failed:",
+          error,
+        );
+      }
 
-    router.refresh();
-  };
+      setUser(null);
+
+      setIsProfileMenuOpen(
+        false,
+      );
+
+      setIsMobileMenuOpen(
+        false,
+      );
+
+      router.refresh();
+    };
 
   const handleSearch = () => {
     const query =
@@ -198,7 +295,8 @@ export default function Header() {
   const profileInitial =
     user?.username
       .charAt(0)
-      .toUpperCase() ?? "A";
+      .toUpperCase() ??
+    "A";
 
   return (
     <>
@@ -208,7 +306,9 @@ export default function Header() {
           <button
             type="button"
             onClick={() =>
-              setIsMobileMenuOpen(true)
+              setIsMobileMenuOpen(
+                true,
+              )
             }
             aria-label="Open navigation"
             aria-expanded={
@@ -255,15 +355,24 @@ export default function Header() {
           <div className="hidden flex-1 justify-center md:flex">
             <input
               type="search"
-              value={searchQuery}
-              onChange={(event) =>
+              value={
+                searchQuery
+              }
+              onChange={(
+                event,
+              ) =>
                 setSearchQuery(
-                  event.target.value,
+                  event
+                    .target
+                    .value,
                 )
               }
-              onKeyDown={(event) => {
+              onKeyDown={(
+                event,
+              ) => {
                 if (
-                  event.key === "Enter"
+                  event.key ===
+                  "Enter"
                 ) {
                   handleSearch();
                 }
@@ -318,14 +427,18 @@ export default function Header() {
               </>
             ) : (
               <div
-                ref={profileMenuRef}
+                ref={
+                  profileMenuRef
+                }
                 className="relative"
               >
                 <button
                   type="button"
                   onClick={() =>
                     setIsProfileMenuOpen(
-                      (current) =>
+                      (
+                        current,
+                      ) =>
                         !current,
                     )
                   }
@@ -336,11 +449,16 @@ export default function Header() {
                   className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] p-1.5 transition hover:border-white/20 hover:bg-white/[0.07] sm:pr-3"
                 >
                   <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#48a7ff] text-sm font-black text-[#06111c]">
-                    {profileInitial}
+                    {
+                      profileInitial
+                    }
                   </span>
 
                   <span className="hidden max-w-32 truncate text-sm font-bold text-white/70 lg:block">
-                    u/{user.username}
+                    u/
+                    {
+                      user.username
+                    }
                   </span>
 
                   <span className="hidden text-xs text-white/30 sm:inline">
@@ -352,11 +470,16 @@ export default function Header() {
                   <div className="absolute right-0 top-[calc(100%+10px)] z-[80] w-64 overflow-hidden rounded-xl border border-white/10 bg-[#12151a] shadow-2xl">
                     <div className="border-b border-white/10 px-4 py-4">
                       <p className="truncate text-sm font-black text-white">
-                        u/{user.username}
+                        u/
+                        {
+                          user.username
+                        }
                       </p>
 
                       <p className="mt-1 truncate text-xs text-white/35">
-                        {user.email}
+                        {
+                          user.email
+                        }
                       </p>
                     </div>
 
@@ -432,24 +555,37 @@ export default function Header() {
       </header>
 
       <MobileSidebar
-        open={isMobileMenuOpen}
+        open={
+          isMobileMenuOpen
+        }
         onClose={() =>
-          setIsMobileMenuOpen(false)
+          setIsMobileMenuOpen(
+            false,
+          )
         }
       />
 
       <AuthModal
-        isOpen={isAuthModalOpen}
-        initialMode={authMode}
-        onClose={() =>
-          setIsAuthModalOpen(false)
+        isOpen={
+          isAuthModalOpen
         }
-        onAuthenticated={(
-          authenticatedUser,
-        ) => {
-          setUser(
-            authenticatedUser,
-          );
+        initialMode={
+          authMode
+        }
+        onClose={() =>
+          setIsAuthModalOpen(
+            false,
+          )
+        }
+        onAuthenticated={() => {
+          /*
+           * Do not trust username supplied
+           * by AuthModal.
+           *
+           * Reload the canonical username
+           * from public.profiles.
+           */
+          void loadAuthenticatedUser();
         }}
       />
     </>
