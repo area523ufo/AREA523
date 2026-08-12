@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import {
   useConnect,
@@ -114,25 +114,6 @@ export default function WalletConnectButton({
     }
   }
 
-  useEffect(() => {
-    if (!connectedAddress) {
-      return;
-    }
-
-    if (
-      connectedAddress ===
-      currentWalletAddress
-    ) {
-      return;
-    }
-
-    void saveWalletAddress(
-      connectedAddress,
-    );
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connectedAddress]);
-
   if (connectedAddress) {
     return (
       <div>
@@ -162,6 +143,23 @@ export default function WalletConnectButton({
               : "Disconnect"}
           </button>
         </div>
+
+{connectedAddress !== currentWalletAddress && (
+  <button
+    type="button"
+    disabled={isSaving}
+    onClick={() =>
+      void saveWalletAddress(
+        connectedAddress,
+      )
+    }
+    className="mt-3 w-full rounded-xl bg-[#48a7ff] px-4 py-3 text-sm font-black text-[#07111b] transition hover:bg-[#6bb8ff] disabled:cursor-not-allowed disabled:opacity-40"
+  >
+    {isSaving
+      ? "Saving..."
+      : "Save Connected Wallet"}
+  </button>
+)}
 
         {isSaving && (
           <p className="mt-2 text-xs text-white/30">

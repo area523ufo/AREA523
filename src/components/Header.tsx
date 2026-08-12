@@ -47,28 +47,63 @@ export default function Header() {
   const profileMenuRef =
     useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    const loadUser = async () => {
-      const { data } =
-        await getCurrentUser();
+ useEffect(() => {
+  const loadUser = async () => {
+    const { data } =
+      await getCurrentUser();
 
-      if (!data.user) {
-        return;
-      }
+    if (!data.user) {
+      setUser(null);
+      return;
+    }
 
-      setUser({
-        username:
-          data.user.user_metadata.username ??
-          data.user.email?.split("@")[0] ??
-          "user",
-        email:
-          data.user.email ?? "",
-      });
-    };
+    const {
+      createClient,
+    } = await import(
+      "@/lib/supabase/client"
+    );
 
-    void loadUser();
-  }, []);
+    const supabase =
+      createClient();
 
+    const {
+      data: profile,
+      error,
+    } = await supabase
+      .from("profiles")
+      .select("username")
+      .eq("id", data.user.id)
+      .maybeSingle();
+
+    if (error) {
+      console.error(
+        "Failed to load profile username:",
+        error,
+      );
+    }
+
+    const username =
+      profile?.username?.trim();
+
+    if (!username) {
+      console.error(
+        "Profile username not found for authenticated user:",
+        data.user.id,
+      );
+
+      setUser(null);
+      return;
+    }
+
+    setUser({
+      username,
+      email:
+        data.user.email ?? "",
+    });
+  };
+
+  void loadUser();
+}, []);
   useEffect(() => {
     const handleOutsideClick = (
       event: MouseEvent,
