@@ -82,7 +82,7 @@ export default function AdminPostActions({
     }
 
     const confirmed = window.confirm(
-      "Force this post to NOT AI VERIFIED?\n\nNo AREA rewards will be issued.",
+      "Force this post to REAL · NOT AI?\n\nNo AREA rewards will be issued.",
     );
 
     if (!confirmed) {

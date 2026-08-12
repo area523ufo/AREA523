@@ -148,7 +148,7 @@ export default async function VerifiedPage() {
                   </p>
 
                   <h1 className="mt-1 text-3xl font-black">
-                    NOT AI VERIFIED
+                    REAL · NOT AI
                   </h1>
 
                   <p className="mt-2 text-sm text-white/45">

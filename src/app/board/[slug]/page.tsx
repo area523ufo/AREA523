@@ -14,7 +14,13 @@ type BoardPageProps = {
   params: Promise<{
     slug: string;
   }>;
+
+  searchParams: Promise<{
+    sort?: string;
+  }>;
 };
+
+type SortMode = "trending" | "latest";
 
 type Board = {
   id: number;
@@ -94,8 +100,16 @@ function normalizePost(post: RawPost): SupabasePostCard {
 
 export default async function BoardPage({
   params,
+  searchParams,
 }: BoardPageProps) {
   const { slug } = await params;
+  const { sort } = await searchParams;
+
+  const sortMode: SortMode =
+    sort === "latest"
+      ? "latest"
+      : "trending";
+
   const supabase = await createClient();
 
   const { data: boardData, error: boardError } =
@@ -160,25 +174,32 @@ export default async function BoardPage({
   }
 
   const boardPosts = ((postData ?? []) as RawPost[])
-    .map(normalizePost)
-    .sort((a, b) => {
-      const aVotes =
-        (a.real_vote_count ?? 0) +
-        (a.ai_vote_count ?? 0);
-
-      const bVotes =
-        (b.real_vote_count ?? 0) +
-        (b.ai_vote_count ?? 0);
-
-      if (bVotes !== aVotes) {
-        return bVotes - aVotes;
-      }
-
+  .map(normalizePost)
+  .sort((a, b) => {
+    if (sortMode === "latest") {
       return (
         new Date(b.created_at).getTime() -
         new Date(a.created_at).getTime()
       );
-    });
+    }
+
+    const aVotes =
+      (a.real_vote_count ?? 0) +
+      (a.ai_vote_count ?? 0);
+
+    const bVotes =
+      (b.real_vote_count ?? 0) +
+      (b.ai_vote_count ?? 0);
+
+    if (bVotes !== aVotes) {
+      return bVotes - aVotes;
+    }
+
+    return (
+      new Date(b.created_at).getTime() -
+      new Date(a.created_at).getTime()
+    );
+  });
 
   const boardDescription =
     board.description ||
@@ -225,29 +246,34 @@ export default async function BoardPage({
             </div>
 
             <div className="mb-4 rounded-xl border border-white/10 bg-[#12151a] p-2">
-              <div className="flex items-center gap-1 overflow-x-auto">
-                <button
-                  type="button"
-                  className="shrink-0 rounded-lg bg-[#48a7ff]/15 px-4 py-2 text-sm font-bold text-[#69b7ff]"
-                >
-                  Trending
-                </button>
+  <div className="flex items-center gap-1 overflow-x-auto">
+    <Link
+      href={`/board/${encodeURIComponent(
+        board.slug,
+      )}?sort=trending`}
+      className={`shrink-0 rounded-lg px-4 py-2 text-sm transition ${
+        sortMode === "trending"
+          ? "bg-[#48a7ff]/15 font-bold text-[#69b7ff]"
+          : "font-semibold text-white/55 hover:bg-white/[0.05] hover:text-white"
+      }`}
+    >
+      Trending
+    </Link>
 
-                <button
-                  type="button"
-                  className="shrink-0 rounded-lg px-4 py-2 text-sm font-semibold text-white/55 transition hover:bg-white/[0.05] hover:text-white"
-                >
-                  Latest
-                </button>
-
-                <button
-                  type="button"
-                  className="shrink-0 rounded-lg px-4 py-2 text-sm font-semibold text-white/55 transition hover:bg-white/[0.05] hover:text-white"
-                >
-                  Most Discussed
-                </button>
-              </div>
-            </div>
+    <Link
+      href={`/board/${encodeURIComponent(
+        board.slug,
+      )}?sort=latest`}
+      className={`shrink-0 rounded-lg px-4 py-2 text-sm transition ${
+        sortMode === "latest"
+          ? "bg-[#48a7ff]/15 font-bold text-[#69b7ff]"
+          : "font-semibold text-white/55 hover:bg-white/[0.05] hover:text-white"
+      }`}
+    >
+      Latest
+    </Link>
+  </div>
+</div>
 
             {postsError && (
               <div className="mb-4 rounded-xl border border-red-400/20 bg-red-400/[0.05] px-5 py-4">
@@ -308,7 +334,7 @@ export default async function BoardPage({
               </p>
 
               <p className="mt-3 text-sm leading-6 text-white/50">
-                Posts may enter the NOT AI VERIFIED archive
+                Posts may enter the REAL · NOT AI archive
                 after reaching the required community consensus
                 and review threshold.
               </p>

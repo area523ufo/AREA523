@@ -1,9 +1,11 @@
 ﻿"use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import VerifiedBadge from "@/components/VerifiedBadge";
+import FeedVideo from "@/components/FeedVideo";
 
 export type PostAuthorRelation = {
   username: string;
@@ -35,6 +37,7 @@ export type SupabasePostCard = {
 
 type PostCardProps = {
   post: SupabasePostCard;
+  initialReposted?: boolean;
 };
 
 type VoteValue = "REAL" | "AI";
@@ -149,7 +152,9 @@ function formatRelativeTime(dateString: string) {
 
 export default function PostCard({
   post,
+  initialReposted = false,
 }: PostCardProps) {
+  const router = useRouter();
   const [realVotes, setRealVotes] = useState(
     post.real_vote_count ?? 0,
   );
@@ -172,7 +177,7 @@ export default function PostCard({
   );
 
   const [reposted, setReposted] =
-    useState(false);
+  useState(initialReposted);
 
   const [pendingRepost, setPendingRepost] =
     useState(false);
@@ -337,7 +342,8 @@ if (!response.ok || !result.success) {
 }
 
       setReposted(result.reposted);
-      setRepostCount(result.repostCount);
+setRepostCount(result.repostCount);
+router.refresh();
     } catch (error) {
       console.error(error);
     } finally {
@@ -346,7 +352,7 @@ if (!response.ok || !result.success) {
   }
 
   return (
-    <article className="group relative overflow-hidden rounded-xl border border-white/10 bg-[#12151a] transition hover:border-white/20">
+    <article className="group relative overflow-hidden border-y border-white/10 bg-[#12151a] transition hover:border-white/20 sm:rounded-xl sm:border">
       <Link
         href={postHref}
         aria-label={`Open post: ${post.title}`}
@@ -355,7 +361,7 @@ if (!response.ok || !result.success) {
 
       <div className="pointer-events-none relative z-10 flex">
 
-        <div className="min-w-0 flex-1 p-4">
+       <div className="min-w-0 flex-1 p-3 sm:p-4">
        <div className="flex items-start gap-3">
   <Link
     href={`/profile/${encodeURIComponent(authorName)}`}
@@ -398,12 +404,6 @@ if (!response.ok || !result.success) {
       {post.board.name}
     </Link>
   )}
-
-  {totalVotes >= 10 && (
-    <span className="rounded-full bg-amber-400/10 px-2 py-0.5 text-[10px] font-bold text-amber-300">
-      TOP REPORT
-    </span>
-  )}
 </div>
 
       {totalVotes >= 10 && (
@@ -415,7 +415,7 @@ if (!response.ok || !result.success) {
   </div>
 </div>
 
-          <h2 className="mt-3 break-words text-lg font-bold leading-6 text-white transition group-hover:text-[#8bc8ff]">
+          <h2 className="mt-3 break-words text-base font-bold leading-6 text-white transition group-hover:text-[#8bc8ff] sm:text-lg">
             {post.title}
           </h2>
 
@@ -424,7 +424,7 @@ if (!response.ok || !result.success) {
           </p>
 
           {post.media_url && (
-            <div className="relative mt-4 flex max-h-[460px] min-h-52 items-center justify-center overflow-hidden rounded-lg border border-white/[0.07] bg-black">
+          <div className="relative -mx-3 mt-4 flex max-h-[560px] min-h-52 items-center justify-center overflow-hidden border-y border-white/[0.07] bg-black sm:mx-0 sm:max-h-[460px] sm:rounded-lg sm:border">
               {verificationNumber !==
                 null && (
                 <div className="absolute left-3 top-3 z-10">
@@ -437,21 +437,17 @@ if (!response.ok || !result.success) {
                 </div>
               )}
 
-              {post.media_type ===
-              "video" ? (
-                <video
-                  src={post.media_url}
-                  muted
-                  playsInline
-                  preload="metadata"
-                  className="max-h-[460px] w-full object-contain"
-                />
-              ) : (
+             {post.media_type ===
+"video" ? (
+  <FeedVideo
+    src={post.media_url}
+  />
+) : (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={post.media_url}
                   alt={post.title}
-                  className="max-h-[460px] w-full object-contain"
+                  className="max-h-[560px] w-full object-contain sm:max-h-[460px]"
                 />
               )}
             </div>
@@ -487,7 +483,7 @@ if (!response.ok || !result.success) {
     href={`${postHref}#comments`}
     aria-label={`${comments} comments`}
     title="Comments"
-    className="pointer-events-auto inline-flex h-9 items-center gap-1.5 rounded-full px-3 transition hover:bg-white/[0.07] hover:text-white"
+    className="pointer-events-auto inline-flex h-9 items-center gap-1.5 rounded-full px-2.5 transition hover:bg-white/[0.07] hover:text-white sm:px-3"
   >
     <CommentIcon />
     <span>{comments}</span>
@@ -499,7 +495,7 @@ if (!response.ok || !result.success) {
     disabled={pendingVote !== null || votingFinalized}
     aria-label="Vote REAL"
     aria-pressed={selectedVote === "REAL"}
-    className={`pointer-events-auto inline-flex h-9 items-center rounded-full px-3 transition ${
+    className={`pointer-events-auto inline-flex h-9 items-center rounded-full px-2.5 sm:px-3 transition ${
       selectedVote === "REAL"
         ? "bg-emerald-400/15 text-emerald-300"
         : "text-emerald-300/70 hover:bg-emerald-400/10 hover:text-emerald-300"
@@ -516,7 +512,7 @@ if (!response.ok || !result.success) {
     disabled={pendingVote !== null || votingFinalized}
     aria-label="Vote AI"
     aria-pressed={selectedVote === "AI"}
-    className={`pointer-events-auto inline-flex h-9 items-center rounded-full px-3 transition ${
+    className={`pointer-events-auto inline-flex h-9 items-center rounded-full px-2.5 sm:px-3 transition ${
       selectedVote === "AI"
         ? "bg-red-400/15 text-red-300"
         : "text-red-300/70 hover:bg-red-400/10 hover:text-red-300"
@@ -534,7 +530,7 @@ if (!response.ok || !result.success) {
     aria-label={reposted ? "Undo repost" : "Repost"}
     aria-pressed={reposted}
     title={reposted ? "Undo repost" : "Repost"}
-    className={`pointer-events-auto inline-flex h-9 items-center gap-1.5 rounded-full px-3 transition ${
+    className={`pointer-events-auto inline-flex h-9 items-center gap-1.5 rounded-full px-2.5 sm:px-3 transition ${
       reposted
         ? "bg-[#48a7ff]/12 text-[#69b7ff]"
         : "text-white/40 hover:bg-white/[0.07] hover:text-white"

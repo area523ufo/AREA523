@@ -3,9 +3,11 @@ import { notFound } from "next/navigation";
 
 import FollowButton from "@/components/FollowButton";
 import Header from "@/components/Header";
+
 import PostCard, {
   type SupabasePostCard,
 } from "@/components/PostCard";
+
 import Sidebar from "@/components/Sidebar";
 
 import { createClient } from "@/lib/supabase/server";
@@ -30,9 +32,16 @@ type Profile = {
 };
 
 type FollowState = {
-  follower_count: number | string;
-  following_count: number | string;
-  is_following: boolean;
+  follower_count:
+    | number
+    | string;
+
+  following_count:
+    | number
+    | string;
+
+  is_following:
+    boolean;
 };
 
 type RepostRow = {
@@ -50,8 +59,13 @@ function getSinglePost(
     | SupabasePostCard[]
     | null,
 ) {
-  if (Array.isArray(value)) {
-    return value[0] ?? null;
+  if (
+    Array.isArray(value)
+  ) {
+    return (
+      value[0] ??
+      null
+    );
   }
 
   return value;
@@ -64,23 +78,35 @@ function formatCount(
     | null
     | undefined,
 ) {
-  const number = Number(value ?? 0);
+  const number =
+    Number(value ?? 0);
 
-  if (!Number.isFinite(number)) {
+  if (
+    !Number.isFinite(
+      number,
+    )
+  ) {
     return "0";
   }
 
-  return new Intl.NumberFormat(
-    "en-US",
-  ).format(number);
+  return new Intl
+    .NumberFormat(
+      "en-US",
+    )
+    .format(number);
 }
 
 export default async function ProfilePage({
   params,
   searchParams,
 }: Props) {
-  const { username } = await params;
-  const { tab } = await searchParams;
+  const {
+    username,
+  } = await params;
+
+  const {
+    tab,
+  } = await searchParams;
 
   const activeTab =
     tab === "reposts"
@@ -102,9 +128,13 @@ export default async function ProfilePage({
    */
 
   const {
-    data: { user: currentUser },
+    data: {
+      user:
+        currentUser,
+    },
   } =
-    await supabase.auth.getUser();
+    await supabase.auth
+      .getUser();
 
   /*
    * -----------------------------------------
@@ -113,8 +143,10 @@ export default async function ProfilePage({
    */
 
   const {
-    data: profileData,
-    error: profileError,
+    data:
+      profileData,
+    error:
+      profileError,
   } =
     await supabase
       .from("profiles")
@@ -160,17 +192,22 @@ export default async function ProfilePage({
    */
 
   const {
-    data: followStateData,
-    error: followStateError,
+    data:
+      followStateData,
+    error:
+      followStateError,
   } =
     await supabase.rpc(
       "get_user_follow_state",
       {
-        p_user_id: profile.id,
+        p_user_id:
+          profile.id,
       },
     );
 
-  if (followStateError) {
+  if (
+    followStateError
+  ) {
     console.error(
       "Follow state failed:",
       followStateError,
@@ -195,8 +232,10 @@ export default async function ProfilePage({
    */
 
   const {
-    data: postsData,
-    error: postsError,
+    data:
+      postsData,
+    error:
+      postsError,
   } =
     await supabase
       .from("posts")
@@ -230,12 +269,13 @@ export default async function ProfilePage({
       )
       .eq(
         "status",
-        "published",
+       "published",
       )
       .order(
         "created_at",
         {
-          ascending: false,
+          ascending:
+            false,
         },
       )
       .limit(100);
@@ -259,11 +299,15 @@ export default async function ProfilePage({
    */
 
   const {
-    data: repostData,
-    error: repostError,
+    data:
+      repostData,
+    error:
+      repostError,
   } =
     await supabase
-      .from("post_reposts")
+      .from(
+        "post_reposts",
+      )
       .select(`
         created_at,
 
@@ -299,7 +343,8 @@ export default async function ProfilePage({
       .order(
         "created_at",
         {
-          ascending: false,
+          ascending:
+            false,
         },
       )
       .limit(100);
@@ -316,12 +361,6 @@ export default async function ProfilePage({
       []) as unknown as
       RepostRow[];
 
-  /*
-   * -----------------------------------------
-   * Profile display
-   * -----------------------------------------
-   */
-
   const profileName =
     profile.display_name?.trim() ||
     profile.username;
@@ -335,18 +374,17 @@ export default async function ProfilePage({
     <main className="min-h-screen bg-[#0b0d10] text-[#e7e9ea]">
       <Header />
 
-      <div className="mx-auto flex w-full max-w-[1320px]">
-        <Sidebar />
+      <div className="mx-auto flex w-full max-w-[1400px] gap-6 px-4 py-6 lg:px-6">
+        <aside className="hidden w-[250px] shrink-0 lg:block">
+          <Sidebar />
+        </aside>
 
-        <section className="min-w-0 flex-1 px-0 py-4 sm:px-4 sm:py-6">
-          {/* PROFILE HEADER */}
-          <div className="overflow-hidden border-y border-white/10 bg-[#12151a] sm:rounded-2xl sm:border">
-            {/* COVER */}
-            <div className="h-24 bg-gradient-to-r from-[#142b40] via-[#15212e] to-[#171b22] sm:h-28" />
+        <section className="min-w-0 flex-1">
+          <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#12151a]">
+            <div className="h-28 bg-gradient-to-r from-[#142b40] via-[#15212e] to-[#171b22]" />
 
-            <div className="px-4 pb-5 sm:px-7 sm:pb-6">
-              <div className="-mt-10 flex flex-col gap-3 sm:-mt-12 sm:flex-row sm:items-end sm:gap-5">
-                {/* AVATAR */}
+            <div className="px-5 pb-6 sm:px-7">
+              <div className="-mt-12 flex flex-col gap-5 sm:flex-row sm:items-end">
                 {profile.avatar_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -354,102 +392,104 @@ export default async function ProfilePage({
                       profile.avatar_url
                     }
                     alt={`${profileName} profile`}
-                    className="h-20 w-20 shrink-0 rounded-full border-4 border-[#12151a] bg-[#12151a] object-cover sm:h-24 sm:w-24"
+                    className="h-24 w-24 shrink-0 rounded-full border-4 border-[#12151a] bg-[#12151a] object-cover"
                   />
                 ) : (
-                  <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full border-4 border-[#12151a] bg-[#17304a] text-3xl font-black text-[#69b7ff] sm:h-24 sm:w-24 sm:text-4xl">
-                    {profileInitial}
+                  <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full border-4 border-[#12151a] bg-[#17304a] text-4xl font-black text-[#69b7ff]">
+                    {
+                      profileInitial
+                    }
                   </div>
                 )}
 
-                {/* NAME / FOLLOW */}
-                <div className="flex min-w-0 flex-1 items-end justify-between gap-3 pb-1">
-                  <div className="min-w-0 flex-1">
-                    <h1 className="break-words text-2xl font-black leading-tight text-white sm:text-3xl">
-                      {profileName}
+                <div className="flex min-w-0 flex-1 flex-wrap items-end justify-between gap-4 pb-1">
+                  <div className="min-w-0">
+                    <h1 className="break-words text-3xl font-black text-white">
+                      {
+                        profileName
+                      }
                     </h1>
 
-                    <p className="mt-1 truncate text-sm text-white/40">
-                      @{profile.username}
+                    <p className="mt-1 text-sm text-white/40">
+                      @
+                      {
+                        profile.username
+                      }
                     </p>
                   </div>
 
                   {!isOwnProfile && (
-                    <div className="shrink-0">
-                      <FollowButton
-                        userId={
-                          profile.id
-                        }
-                        initialFollowing={
-                          Boolean(
-                            followState.is_following,
-                          )
-                        }
-                      />
-                    </div>
+                    <FollowButton
+                      userId={
+                        profile.id
+                      }
+                      initialFollowing={
+                        Boolean(
+                          followState.is_following,
+                        )
+                      }
+                    />
                   )}
                 </div>
               </div>
 
-              {/* BIO */}
               {profile.bio && (
-                <p className="mt-4 max-w-2xl whitespace-pre-wrap break-words text-sm leading-6 text-white/65 sm:mt-5">
-                  {profile.bio}
+                <p className="mt-5 max-w-2xl whitespace-pre-wrap text-sm leading-6 text-white/65">
+                  {
+                    profile.bio
+                  }
                 </p>
               )}
 
-              {/* FOLLOW STATS */}
-              <div className="mt-4 flex flex-wrap items-center gap-1 text-sm sm:mt-5">
+              <div className="mt-5 flex flex-wrap items-center gap-5 text-sm">
                 <Link
-                  href={`/profile/${encodeURIComponent(
-                    profile.username,
-                  )}/followers`}
-                  className="rounded-lg px-2 py-2 text-white/45 transition hover:bg-white/[0.05] hover:text-white"
-                >
-                  <strong className="mr-1 font-black text-white">
-                    {formatCount(
-                      followState.follower_count,
-                    )}
-                  </strong>
+  href={`/profile/${encodeURIComponent(
+    profile.username,
+  )}/followers`}
+  className="text-white/45 transition hover:text-white"
+>
+  <strong className="mr-1 font-black text-white">
+    {formatCount(
+      followState.follower_count,
+    )}
+  </strong>
+  Followers
+</Link>
 
-                  Followers
-                </Link>
-
-                <Link
-                  href={`/profile/${encodeURIComponent(
-                    profile.username,
-                  )}/following`}
-                  className="rounded-lg px-2 py-2 text-white/45 transition hover:bg-white/[0.05] hover:text-white"
-                >
-                  <strong className="mr-1 font-black text-white">
-                    {formatCount(
-                      followState.following_count,
-                    )}
-                  </strong>
-
-                  Following
-                </Link>
+<Link
+  href={`/profile/${encodeURIComponent(
+    profile.username,
+  )}/following`}
+  className="text-white/45 transition hover:text-white"
+>
+  <strong className="mr-1 font-black text-white">
+    {formatCount(
+      followState.following_count,
+    )}
+  </strong>
+  Following
+</Link>
               </div>
             </div>
           </div>
 
-          {/* TABS */}
-          <div className="mt-3 flex border-b border-white/10 sm:mt-5">
+          <div className="mt-5 flex border-b border-white/10">
             <Link
               href={`/profile/${encodeURIComponent(
                 profile.username,
               )}`}
-              className={`relative flex-1 px-4 py-3.5 text-center text-sm font-black transition ${
-                activeTab === "posts"
+              className={`relative px-5 py-4 text-sm font-black transition ${
+                activeTab ===
+                "posts"
                   ? "text-white"
-                  : "text-white/35 hover:bg-white/[0.025] hover:text-white/70"
+                  : "text-white/35 hover:text-white/70"
               }`}
             >
               Posts
 
               {activeTab ===
                 "posts" && (
-                <span className="absolute inset-x-6 bottom-0 h-0.5 rounded-full bg-[#48a7ff] sm:inset-x-10" />
+                <span className="absolute inset-x-4 bottom-0 h-0.5 rounded-full bg-[#48a7ff]" />
               )}
             </Link>
 
@@ -457,46 +497,54 @@ export default async function ProfilePage({
               href={`/profile/${encodeURIComponent(
                 profile.username,
               )}?tab=reposts`}
-              className={`relative flex-1 px-4 py-3.5 text-center text-sm font-black transition ${
-                activeTab === "reposts"
+              className={`relative px-5 py-4 text-sm font-black transition ${
+                activeTab ===
+                "reposts"
                   ? "text-white"
-                  : "text-white/35 hover:bg-white/[0.025] hover:text-white/70"
+                  : "text-white/35 hover:text-white/70"
               }`}
             >
               Reposts
 
               {activeTab ===
                 "reposts" && (
-                <span className="absolute inset-x-6 bottom-0 h-0.5 rounded-full bg-[#48a7ff] sm:inset-x-10" />
+                <span className="absolute inset-x-4 bottom-0 h-0.5 rounded-full bg-[#48a7ff]" />
               )}
             </Link>
           </div>
 
-          {/* POSTS */}
-          {activeTab === "posts" ? (
-            <div className="mt-3 space-y-2 sm:mt-5 sm:space-y-4">
-              {posts.length === 0 ? (
-                <div className="border-y border-white/10 bg-[#12151a] px-6 py-14 text-center sm:rounded-xl sm:border sm:py-16">
+          {activeTab ===
+          "posts" ? (
+            <div className="mt-5 space-y-4">
+              {posts.length ===
+              0 ? (
+                <div className="rounded-xl border border-white/10 bg-[#12151a] px-6 py-16 text-center">
                   <p className="text-sm font-semibold text-white/35">
                     No posts yet.
                   </p>
                 </div>
               ) : (
                 posts.map(
-                  (post) => (
+                  (
+                    post,
+                  ) => (
                     <PostCard
-                      key={post.id}
-                      post={post}
+                      key={
+                        post.id
+                      }
+                      post={
+                        post
+                      }
                     />
                   ),
                 )
               )}
             </div>
           ) : (
-            /* REPOSTS */
-            <div className="mt-3 space-y-2 sm:mt-5 sm:space-y-4">
-              {reposts.length === 0 ? (
-                <div className="border-y border-white/10 bg-[#12151a] px-6 py-14 text-center sm:rounded-xl sm:border sm:py-16">
+            <div className="mt-5 space-y-4">
+              {reposts.length ===
+              0 ? (
+                <div className="rounded-xl border border-white/10 bg-[#12151a] px-6 py-16 text-center">
                   <p className="text-sm font-semibold text-white/35">
                     No reposts yet.
                   </p>
@@ -512,7 +560,9 @@ export default async function ProfilePage({
                         row.post,
                       );
 
-                    if (!post) {
+                    if (
+                      !post
+                    ) {
                       return null;
                     }
 
@@ -520,12 +570,11 @@ export default async function ProfilePage({
                       <div
                         key={`${post.id}-${row.created_at}-${index}`}
                       >
-                        {/* REPOST LABEL */}
-                        <div className="mb-2 flex items-center gap-2 px-3 text-xs font-bold text-white/35 sm:px-2">
+                        <div className="mb-2 flex items-center gap-2 px-2 text-xs font-bold text-white/35">
                           <svg
                             viewBox="0 0 24 24"
                             aria-hidden="true"
-                            className="h-4 w-4 shrink-0"
+                            className="h-4 w-4"
                             fill="none"
                             stroke="currentColor"
                             strokeWidth="1.8"
@@ -538,13 +587,19 @@ export default async function ProfilePage({
                             <path d="M21 13v2a3 3 0 0 1-3 3H3" />
                           </svg>
 
-                          <span className="min-w-0 truncate">
-                            @{profile.username} reposted
+                          <span>
+                            @
+                            {
+                              profile.username
+                            }{" "}
+                            reposted
                           </span>
                         </div>
 
                         <PostCard
-                          post={post}
+                          post={
+                            post
+                          }
                         />
                       </div>
                     );

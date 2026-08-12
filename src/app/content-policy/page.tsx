@@ -32,8 +32,8 @@ export default function ContentPolicyPage() {
               />
 
               <Policy
-                title="NOT AI VERIFIED"
-                text="NOT AI VERIFIED means a report satisfied AREA523's platform verification requirements. It does not establish that every claim, interpretation, caption, or theory associated with the media is factually true."
+                title="REAL · NOT AI"
+                text="REAL · NOT AI means a report satisfied AREA523's platform verification requirements. It does not establish that every claim, interpretation, caption, or theory associated with the media is factually true."
               />
 
               <Policy

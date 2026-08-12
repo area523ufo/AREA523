@@ -1,0 +1,9 @@
+{
+  "nodeModulesDir": "auto",
+  "imports": {
+    "@solana/web3.js": "npm:@solana/web3.js",
+    "@solana/spl-token": "npm:@solana/spl-token",
+    "@supabase/supabase-js": "npm:@supabase/supabase-js",
+    "bs58": "npm:bs58"
+  }
+}

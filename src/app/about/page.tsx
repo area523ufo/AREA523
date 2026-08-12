@@ -45,11 +45,11 @@ export default function AboutPage() {
 
             <section className="mt-4 rounded-2xl border border-white/10 bg-[#12151a] p-6 sm:p-8">
               <h2 className="text-xl font-black text-[#69b7ff]">
-                NOT AI VERIFIED
+                REAL · NOT AI
               </h2>
 
               <p className="mt-4 leading-7 text-white/50">
-                NOT AI VERIFIED identifies reports that
+                REAL · NOT AI identifies reports that
                 satisfy AREA523&apos;s verification
                 requirements and receive sufficient
                 community support for authenticity.

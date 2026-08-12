@@ -164,9 +164,11 @@ export default async function PostPage({
 <div className="flex items-start justify-between gap-4">
   <div className="flex flex-wrap items-center gap-2">
     <span className="rounded-full border border-[#48a7ff]/25 bg-[#48a7ff]/5 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#69b7ff]">
-      {post.verification_status
-        ? post.verification_status.replaceAll("_", " ")
-        : "Not verified"}
+      {post.verification_status === "verified_real"
+  ? "REAL · NOT AI"
+  : post.verification_status === "verified_ai"
+    ? "AI"
+    : "UNVERIFIED"}
     </span>
 
     {post.is_original_media && (

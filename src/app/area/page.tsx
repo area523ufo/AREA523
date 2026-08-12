@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 
@@ -61,7 +63,7 @@ export default function AreaTokenPage() {
 
               <div className="mt-5 space-y-4 text-sm leading-7 text-white/50">
                 <p>
-                  Eligible NOT AI VERIFIED reports can
+                  Eligible REAL · NOT AI reports can
                   receive AREA rewards.
                 </p>
 
@@ -81,49 +83,16 @@ export default function AreaTokenPage() {
 
             <section className="mt-4 rounded-2xl border border-white/10 bg-[#12151a] p-6 sm:p-8">
               <h2 className="text-xl font-black">
-                Tokenomics
-              </h2>
-
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                <TokenRow
-                  label="Total Supply"
-                  value="1,000,000,000 AREA"
-                />
-
-                <TokenRow
-                  label="Founder"
-                  value="30% · 300,000,000"
-                />
-
-                <TokenRow
-                  label="Treasury"
-                  value="30% · 300,000,000"
-                />
-
-                <TokenRow
-                  label="Rewards"
-                  value="20% · 200,000,000"
-                />
-
-                <TokenRow
-                  label="Liquidity"
-                  value="20% · 200,000,000"
-                />
-              </div>
-            </section>
-
-            <section className="mt-4 rounded-2xl border border-white/10 bg-[#12151a] p-6 sm:p-8">
-              <h2 className="text-xl font-black">
                 Rewards and burn policy
               </h2>
 
               <p className="mt-4 leading-7 text-white/50">
-                The Rewards allocation is capped and does
-                not expand automatically with user growth.
-                AREA523 applies defined reward budgets and
-                may burn unused reward allocations
-                according to the platform&apos;s published
-                reward policy.
+                AREA523 uses defined reward budgets for
+                eligible platform participation. Token
+                rewards do not expand automatically with
+                user growth, and unused reward allocations
+                may be burned according to the
+                platform&apos;s reward policy.
               </p>
             </section>
 
@@ -157,33 +126,22 @@ export default function AreaTokenPage() {
 
               <p className="mt-3 text-sm leading-6 text-white/30">
                 Launch timing may change if required by
-                technical, liquidity, or operational
-                conditions.
+                technical, liquidity, regulatory, or
+                operational conditions.
               </p>
             </section>
+
+            <div className="mt-8 border-t border-white/[0.06] pt-5">
+              <Link
+                href="/area/token-information"
+                className="text-xs font-semibold text-white/25 transition hover:text-white/55"
+              >
+                AREA Token Information →
+              </Link>
+            </div>
           </div>
         </div>
       </div>
     </main>
-  );
-}
-
-function TokenRow({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.025] p-4">
-      <p className="text-xs font-black uppercase tracking-[0.14em] text-white/30">
-        {label}
-      </p>
-
-      <p className="mt-2 text-sm font-black text-white/80">
-        {value}
-      </p>
-    </div>
   );
 }
