@@ -12,13 +12,9 @@ type CommunityArea = {
   slug: string;
 };
 
-type SidebarProps = {
-  mobile?: boolean;
-};
-
 const primaryLinks = [
   {
-    name: "REAL · NOT AI",
+    name: "NOT AI VERIFIED",
     href: "/verified",
     icon: "✓",
   },
@@ -52,18 +48,14 @@ const coreAreas = [
   },
 ];
 
-export default function Sidebar({
-  mobile = false,
-}: SidebarProps) {
+export default function Sidebar() {
   const pathname = usePathname();
 
   const [communityAreas, setCommunityAreas] =
     useState<CommunityArea[]>([]);
 
-  const [
-    loadingCommunityAreas,
-    setLoadingCommunityAreas,
-  ] = useState(true);
+  const [loadingCommunityAreas, setLoadingCommunityAreas] =
+    useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -125,14 +117,8 @@ export default function Sidebar({
   }
 
   return (
-    <aside
-      className={
-        mobile
-          ? "w-full px-3 py-4"
-          : "sticky top-16 hidden h-[calc(100vh-4rem)] w-[240px] shrink-0 overflow-y-auto border-r border-white/10 px-3 py-4 lg:block"
-      }
-    >
-      <nav className="flex flex-col">
+    <aside className="hidden w-[230px] shrink-0 border-r border-white/10 lg:block">
+      <nav className="sticky top-16 flex h-[calc(100vh-4rem)] flex-col overflow-y-auto px-3 py-5">
         {/* PRIMARY */}
         <div className="space-y-1">
           {primaryLinks.map((item) => {
@@ -165,9 +151,7 @@ export default function Sidebar({
                   {item.icon}
                 </span>
 
-                <span>
-                  {item.name}
-                </span>
+                <span>{item.name}</span>
               </Link>
             );
           })}
@@ -183,17 +167,14 @@ export default function Sidebar({
 
           <div className="space-y-1">
             {coreAreas.map((area) => {
-              const active =
-                isActive(area.href);
+              const active = isActive(area.href);
 
               return (
                 <Link
                   key={area.name}
                   href={area.href}
                   aria-current={
-                    active
-                      ? "page"
-                      : undefined
+                    active ? "page" : undefined
                   }
                   className={`relative flex items-center rounded-lg px-3 py-2.5 text-sm font-semibold transition ${
                     active
@@ -223,9 +204,7 @@ export default function Sidebar({
             +
           </span>
 
-          <span>
-            Create Area
-          </span>
+          <span>Create Area</span>
         </Link>
 
         {/* COMMUNITY AREAS */}
