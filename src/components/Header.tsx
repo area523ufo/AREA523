@@ -408,7 +408,7 @@ export default function Header() {
                       "login",
                     )
                   }
-                  className="hidden rounded-full px-4 py-2 text-sm font-semibold text-white/70 transition hover:bg-white/[0.06] hover:text-white sm:block"
+                  className="rounded-full px-3 py-2 text-sm font-semibold text-white/70 transition hover:bg-white/[0.06] hover:text-white sm:px-4"
                 >
                   Log In
                 </button>
@@ -538,18 +538,28 @@ export default function Header() {
             )}
 
             {/* CREATE */}
-            <Link
-              href="/create"
-              className="rounded-full bg-[#48a7ff] px-3 py-2 text-sm font-bold text-[#00111c] transition hover:bg-[#71baff] sm:px-4"
-            >
-              <span className="sm:hidden">
-                Create
-              </span>
-
-              <span className="hidden sm:inline">
-                Create Post
-              </span>
-            </Link>
+            {user ? (
+  <Link
+    href="/create"
+    className="rounded-full bg-[#48a7ff] px-3 py-2 text-sm font-bold text-[#00111c] transition hover:bg-[#71baff] sm:px-4"
+  >
+    <span className="sm:hidden">＋</span>
+    <span className="hidden sm:inline">
+      Create Post
+    </span>
+  </Link>
+) : (
+  <button
+    type="button"
+    onClick={() => openAuthModal("login")}
+    className="rounded-full bg-[#48a7ff] px-3 py-2 text-sm font-bold text-[#00111c] transition hover:bg-[#71baff] sm:px-4"
+  >
+    <span className="sm:hidden">＋</span>
+    <span className="hidden sm:inline">
+      Create Post
+    </span>
+  </button>
+)}
           </nav>
         </div>
       </header>
