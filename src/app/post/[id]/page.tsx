@@ -228,20 +228,7 @@ export default async function PostPage({
                     />
                   )}
                 </div>
-              ) : (
-                <div className="flex min-h-52 items-center justify-center border-b border-white/10 bg-[#0b0d10] px-6 text-center">
-                  <div>
-                    <p className="text-sm font-black text-white/35">
-                      NO MEDIA ATTACHED
-                    </p>
-
-                    <p className="mt-2 text-xs text-white/20">
-                      Media upload will be connected in the
-                      next implementation step.
-                    </p>
-                  </div>
-                </div>
-              )}
+              ) : null}
 
               <div className="space-y-6 px-5 py-6 sm:px-7">
                 <section>
