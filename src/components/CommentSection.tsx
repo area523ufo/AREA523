@@ -520,13 +520,13 @@ if (await checkSuspended()) {
       <article
         key={comment.id}
         className={
-          isReply
-            ? "border-l border-white/10 py-4 pl-4 sm:pl-6"
-            : "py-5 first:pt-0 last:pb-0"
+         isReply
+  ? "border-l border-white/10 py-4 pl-2 sm:pl-4"
+  : "py-5 first:pt-0 last:pb-0"
         }
       >
-        <div className="flex gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/5">
+       <div className="flex gap-2 sm:gap-3">
+         <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/5 sm:h-10 sm:w-10">
             {profile?.avatar_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
