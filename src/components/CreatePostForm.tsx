@@ -12,12 +12,11 @@ import {
   useState,
 } from "react";
 
-const boards = [
-  { name: "UFO", value: "ufo" },
-  { name: "Politics", value: "politics" },
-  { name: "Stocks", value: "stocks" },
-  { name: "Memes", value: "memes" },
-];
+type BoardOption = {
+  id: number;
+  name: string;
+  slug: string;
+};
 
 const MAX_TITLE_LENGTH = 100;
 const MAX_FILE_SIZE = 100 * 1024 * 1024;
@@ -38,6 +37,8 @@ function formatFileSize(bytes: number) {
 
 export default function CreatePostForm() {
   const [board, setBoard] = useState("");
+  const [boards, setBoards] = useState<BoardOption[]>([]);
+  const [boardsLoading, setBoardsLoading] = useState(true);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
@@ -71,6 +72,52 @@ export default function CreatePostForm() {
     fileError,
     isSubmitting,
   ]);
+
+useEffect(() => {
+  let cancelled = false;
+
+  async function loadBoards() {
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from("boards")
+      .select("id, name, slug")
+      .eq("is_active", true)
+      .order("sort_order", {
+        ascending: true,
+      })
+      .order("name", {
+        ascending: true,
+      });
+
+    if (cancelled) {
+      return;
+    }
+
+    if (error) {
+      console.error(
+        "Failed to load boards:",
+        error,
+      );
+
+      setBoards([]);
+      setBoardsLoading(false);
+      return;
+    }
+
+    setBoards(
+      (data ?? []) as BoardOption[],
+    );
+
+    setBoardsLoading(false);
+  }
+
+  void loadBoards();
+
+  return () => {
+    cancelled = true;
+  };
+}, []);
 
   useEffect(() => {
     return () => {
@@ -368,17 +415,19 @@ if (mediaFile) {
             className="w-full rounded-xl border border-white/10 bg-[#0b0d10] px-4 py-3 text-sm text-white outline-none transition focus:border-[#48a7ff]/60"
           >
             <option value="" disabled>
-              Select a board
-            </option>
+  {boardsLoading
+    ? "Loading boards..."
+    : "Select a board"}
+</option>
 
-            {boards.map((boardOption) => (
-              <option
-                key={boardOption.value}
-                value={boardOption.value}
-              >
-                {boardOption.name}
-              </option>
-            ))}
+{boards.map((boardOption) => (
+  <option
+    key={boardOption.id}
+    value={boardOption.slug}
+  >
+    {boardOption.name}
+  </option>
+))}
           </select>
         </div>
 
