@@ -517,200 +517,204 @@ if (await checkSuspended()) {
       : getReplies(comment.id);
 
     return (
-      <article
-        key={comment.id}
-        className={
-         isReply
-  ? "border-l border-white/10 py-4 pl-2 sm:pl-4"
-  : "py-5 first:pt-0 last:pb-0"
-        }
-      >
-       <div className="flex gap-2 sm:gap-3">
-         <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/5 sm:h-10 sm:w-10">
-            {profile?.avatar_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={profile.avatar_url}
-                alt={displayName}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <span className="text-sm font-black uppercase text-white/40">
-                {displayName.charAt(0)}
-              </span>
+  <article
+    key={comment.id}
+    className={
+      isReply
+        ? "border-l border-white/10 py-4 pl-2 sm:pl-4"
+        : "py-5 first:pt-0 last:pb-0"
+    }
+  >
+    {/* HEADER */}
+    <div className="flex items-center gap-2 sm:gap-3">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/5 sm:h-10 sm:w-10">
+        {profile?.avatar_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={profile.avatar_url}
+            alt={displayName}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <span className="text-sm font-black uppercase text-white/40">
+            {displayName.charAt(0)}
+          </span>
+        )}
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <Link
+            href={`/profile/${encodeURIComponent(
+              username,
+            )}`}
+            className="truncate text-sm font-black text-white transition hover:text-[#69b7ff]"
+          >
+            {displayName}
+          </Link>
+
+          <Link
+            href={`/profile/${encodeURIComponent(
+              username,
+            )}`}
+            className="text-xs font-semibold text-white/30 transition hover:text-white/50"
+          >
+            @{username}
+          </Link>
+
+          <span
+            aria-hidden="true"
+            className="text-white/15"
+          >
+            ·
+          </span>
+
+          <time className="text-xs font-semibold text-white/25">
+            {formatCommentDate(
+              comment.created_at,
             )}
-          </div>
+          </time>
 
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              <Link
-                href={`/profile/${encodeURIComponent(
-                  username,
-                )}`}
-                className="truncate text-sm font-black text-white transition hover:text-[#69b7ff]"
-              >
-                {displayName}
-              </Link>
-
-              <Link
-                href={`/profile/${encodeURIComponent(
-                  username,
-                )}`}
-                className="text-xs font-semibold text-white/30 transition hover:text-white/50"
-              >
-                @{username}
-              </Link>
-
-              <span
-                aria-hidden="true"
-                className="text-white/15"
-              >
-                ·
-              </span>
-
-              <time className="text-xs font-semibold text-white/25">
-                {formatCommentDate(
-                  comment.created_at,
-                )}
-              </time>
-
-              {comment.is_edited && (
-                <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-white/20">
-                  Edited
-                </span>
-              )}
-            </div>
-
-            <p
-              className={`mt-3 whitespace-pre-wrap break-words text-sm leading-6 ${
-                comment.is_removed
-                  ? "italic text-white/30"
-                  : "text-white/70"
-              }`}
-            >
-              {comment.is_removed
-                ? "[Comment removed]"
-                : comment.content}
-            </p>
-
-            {!comment.is_removed && (
-              <div className="mt-3 flex items-center gap-4">
-                {!isReply && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (
-                        replyingTo ===
-                        comment.id
-                      ) {
-                        setReplyingTo(null);
-                        setReplyContent("");
-                      } else {
-                        setReplyingTo(
-                          comment.id,
-                        );
-                        setReplyContent("");
-                      }
-                    }}
-                    className="text-[11px] font-black uppercase tracking-[0.12em] text-white/35 transition hover:text-[#69b7ff]"
-                  >
-                    Reply
-                  </button>
-                )}
-
-                {isOwner && (
-                  <button
-                    type="button"
-                    disabled={
-                      deletingCommentId ===
-                      comment.id
-                    }
-                    onClick={() =>
-                      void handleDelete(
-                        comment.id,
-                      )
-                    }
-                    className="text-[11px] font-black uppercase tracking-[0.12em] text-red-300/60 transition hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-40"
-                  >
-                    {deletingCommentId ===
-                    comment.id
-                      ? "Deleting..."
-                      : "Delete"}
-                  </button>
-                )}
-              </div>
-            )}
-
-            {!isReply &&
-              replyingTo === comment.id && (
-                <form
-                  onSubmit={(event) =>
-                    void handleReply(
-                      event,
-                      comment.id,
-                    )
-                  }
-                  className="mt-4 rounded-xl border border-white/10 bg-[#0b0d10] p-3"
-                >
-                  <textarea
-                    value={replyContent}
-                    onChange={(event) =>
-                      setReplyContent(
-                        event.target.value,
-                      )
-                    }
-                    rows={3}
-                    maxLength={5000}
-                    autoFocus
-                    disabled={
-                      isReplySubmitting
-                    }
-                    placeholder={`Reply to @${username}...`}
-                    className="w-full resize-y bg-transparent text-sm leading-6 text-white outline-none placeholder:text-white/20"
-                  />
-
-                  <div className="mt-3 flex items-center justify-end gap-2 border-t border-white/10 pt-3">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setReplyingTo(null);
-                        setReplyContent("");
-                      }}
-                      className="rounded-full px-4 py-2 text-xs font-bold text-white/35 transition hover:bg-white/[0.06] hover:text-white"
-                    >
-                      Cancel
-                    </button>
-
-                    <button
-                      type="submit"
-                      disabled={
-                        !replyContent.trim() ||
-                        isReplySubmitting
-                      }
-                      className="rounded-full bg-[#48a7ff] px-4 py-2 text-xs font-black text-[#07111b] transition hover:bg-[#69b7ff] disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      {isReplySubmitting
-                        ? "Replying..."
-                        : "Reply"}
-                    </button>
-                  </div>
-                </form>
-              )}
-
-            {!isReply &&
-              replies.length > 0 && (
-                <div className="mt-4 space-y-1">
-                  {replies.map((reply) =>
-                    renderComment(
-                      reply,
-                      true,
-                    ),
-                  )}
-                </div>
-              )}
-          </div>
+          {comment.is_edited && (
+            <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-white/20">
+              Edited
+            </span>
+          )}
         </div>
-      </article>
+      </div>
+    </div>
+
+    {/* BODY */}
+    <div className="mt-3">
+      <p
+        className={`whitespace-pre-wrap break-words text-[15px] leading-6 sm:text-base sm:leading-7 ${
+          comment.is_removed
+            ? "italic text-white/30"
+            : "text-white/75"
+        }`}
+      >
+        {comment.is_removed
+          ? "[Comment removed]"
+          : comment.content}
+      </p>
+
+      {!comment.is_removed && (
+        <div className="mt-3 flex items-center gap-4">
+          {!isReply && (
+            <button
+              type="button"
+              onClick={() => {
+                if (
+                  replyingTo ===
+                  comment.id
+                ) {
+                  setReplyingTo(null);
+                  setReplyContent("");
+                } else {
+                  setReplyingTo(
+                    comment.id,
+                  );
+                  setReplyContent("");
+                }
+              }}
+              className="text-[11px] font-black uppercase tracking-[0.12em] text-white/35 transition hover:text-[#69b7ff]"
+            >
+              Reply
+            </button>
+          )}
+
+          {isOwner && (
+            <button
+              type="button"
+              disabled={
+                deletingCommentId ===
+                comment.id
+              }
+              onClick={() =>
+                void handleDelete(
+                  comment.id,
+                )
+              }
+              className="text-[11px] font-black uppercase tracking-[0.12em] text-red-300/60 transition hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {deletingCommentId ===
+              comment.id
+                ? "Deleting..."
+                : "Delete"}
+            </button>
+          )}
+        </div>
+      )}
+
+      {!isReply &&
+        replyingTo === comment.id && (
+          <form
+            onSubmit={(event) =>
+              void handleReply(
+                event,
+                comment.id,
+              )
+            }
+            className="mt-4 rounded-xl border border-white/10 bg-[#0b0d10] p-3"
+          >
+            <textarea
+              value={replyContent}
+              onChange={(event) =>
+                setReplyContent(
+                  event.target.value,
+                )
+              }
+              rows={3}
+              maxLength={5000}
+              autoFocus
+              disabled={
+                isReplySubmitting
+              }
+              placeholder={`Reply to @${username}...`}
+              className="w-full resize-y bg-transparent text-sm leading-6 text-white outline-none placeholder:text-white/20"
+            />
+
+            <div className="mt-3 flex items-center justify-end gap-2 border-t border-white/10 pt-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setReplyingTo(null);
+                  setReplyContent("");
+                }}
+                className="rounded-full px-4 py-2 text-xs font-bold text-white/35 transition hover:bg-white/[0.06] hover:text-white"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                disabled={
+                  !replyContent.trim() ||
+                  isReplySubmitting
+                }
+                className="rounded-full bg-[#48a7ff] px-4 py-2 text-xs font-black text-[#07111b] transition hover:bg-[#69b7ff] disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {isReplySubmitting
+                  ? "Replying..."
+                  : "Reply"}
+              </button>
+            </div>
+          </form>
+        )}
+
+      {!isReply &&
+        replies.length > 0 && (
+          <div className="mt-4 space-y-1">
+            {replies.map((reply) =>
+              renderComment(
+                reply,
+                true,
+              ),
+            )}
+          </div>
+        )}
+    </div>
+  </article>
     );
   }
 
