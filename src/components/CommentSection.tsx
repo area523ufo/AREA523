@@ -521,7 +521,7 @@ if (await checkSuspended()) {
     key={comment.id}
     className={
       isReply
-        ? "border-l border-white/10 py-4 pl-2 sm:pl-4"
+        ? "border-l border-white/10 py-4 pl-1 sm:pl-4"
         : "py-5 first:pt-0 last:pb-0"
     }
   >
@@ -721,7 +721,7 @@ if (await checkSuspended()) {
   return (
     <section
       id="comments"
-      className="rounded-xl border border-white/10 bg-white/[0.02] p-4 sm:p-5"
+      className="rounded-xl border border-white/10 bg-white/[0.02] px-1 py-4 sm:p-5"
     >
       <div className="flex items-center justify-between gap-4">
         <div>
