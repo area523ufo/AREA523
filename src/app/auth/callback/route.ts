@@ -86,17 +86,6 @@ export async function GET(
     );
   }
 
-  if (
-    !profile.username_set
-  ) {
-    return NextResponse.redirect(
-      new URL(
-        "/choose-username",
-        requestUrl.origin,
-      ),
-    );
-  }
-
   return NextResponse.redirect(
     new URL(
       "/",
