@@ -1,20 +1,15 @@
-import { createClient } from "./client";
+import { createClient } from "@/lib/supabase/client";
 
 export async function signUp(
   email: string,
   password: string,
-  username: string,
 ) {
-  const supabase = createClient();
+  const supabase =
+    createClient();
 
   return await supabase.auth.signUp({
     email,
     password,
-    options: {
-      data: {
-        username,
-      },
-    },
   });
 }
 
@@ -22,7 +17,8 @@ export async function signIn(
   email: string,
   password: string,
 ) {
-  const supabase = createClient();
+  const supabase =
+    createClient();
 
   return await supabase.auth.signInWithPassword({
     email,
@@ -31,29 +27,33 @@ export async function signIn(
 }
 
 export async function signInWithGoogle() {
-  const supabase = createClient();
+  const supabase =
+    createClient();
 
-  const origin =
+  const redirectTo =
     typeof window !== "undefined"
-      ? window.location.origin
-      : "https://area523.com";
+      ? `${window.location.origin}/auth/callback`
+      : undefined;
 
   return await supabase.auth.signInWithOAuth({
     provider: "google",
+
     options: {
-      redirectTo: `${origin}/auth/callback`,
+      redirectTo,
     },
   });
 }
 
-export async function signOut() {
-  const supabase = createClient();
-
-  return await supabase.auth.signOut();
-}
-
 export async function getCurrentUser() {
-  const supabase = createClient();
+  const supabase =
+    createClient();
 
   return await supabase.auth.getUser();
+}
+
+export async function signOut() {
+  const supabase =
+    createClient();
+
+  return await supabase.auth.signOut();
 }
